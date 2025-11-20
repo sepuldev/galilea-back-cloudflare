@@ -3,6 +3,7 @@ import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { postsRouter } from "./endpoints/posts/router";
 import { emailRouter } from "./endpoints/email/router";
+import { consultationsRouter } from "./endpoints/consultations/router";
 import { ContentfulStatusCode } from "hono/utils/http-status";
 import { DummyEndpoint } from "./endpoints/dummyEndpoint";
 
@@ -65,6 +66,9 @@ openapi.route("/posts", postsRouter);
 
 // Register Email Sub router
 openapi.route("/email", emailRouter);
+
+// Register Consultations Sub router
+openapi.route("/consultations", consultationsRouter);
 
 // Register other endpoints
 openapi.post("/dummy/:slug", DummyEndpoint);
