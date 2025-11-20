@@ -1,0 +1,16 @@
+{
+  "compatibility_date": "2025-10-08",
+  "main": "src/index.ts",
+  "name": "galilea-back-cloudflare",
+  "upload_source_maps": true,
+  "observability": {
+    "enabled": true
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "borrar-bbdd",
+      "database_id": "b4f6472b-c941-41ef-b6e6-5d0adb938a16"
+    }
+  ]
+}
