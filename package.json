@@ -23,6 +23,7 @@
     "test": "wrangler deploy --dry-run && npx vitest run --config tests/vitest.config.mts"
   },
   "dependencies": {
+    "@sendgrid/mail": "^8.1.0",
     "@supabase/supabase-js": "^2.39.0",
     "chanfana": "2.8.1",
     "hono": "4.8.2",

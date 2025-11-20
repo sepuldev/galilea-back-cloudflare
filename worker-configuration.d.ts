@@ -5,6 +5,10 @@ declare namespace Cloudflare {
 	interface Env {
 		SUPABASE_URL: string;
 		SUPABASE_ANON_KEY: string;
+		SENDGRID_API_KEY: string;
+		OWNER_EMAIL?: string;
+		SMTP_FROM: string;
+		SMTP_REPLY_TO?: string;
 	}
 }
 interface Env extends Cloudflare.Env {}

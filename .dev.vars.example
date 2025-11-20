@@ -1,6 +1,13 @@
 # Variables de entorno para desarrollo local
-# Copia este archivo a .dev.vars y completa con tus credenciales de Supabase
+# Copia este archivo a .dev.vars y completa con tus credenciales
 
+# Supabase
 SUPABASE_URL=https://tu-proyecto.supabase.co
 SUPABASE_ANON_KEY=tu_clave_anonima_aqui
+
+# SendGrid
+SENDGRID_API_KEY=tu_api_key_de_sendgrid
+SMTP_FROM=noreply@tudominio.com
+OWNER_EMAIL=propietario@tudominio.com
+SMTP_REPLY_TO=reply@tudominio.com
 
