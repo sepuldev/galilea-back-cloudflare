@@ -46,16 +46,26 @@ export class PostUpdate extends OpenAPIRoute {
   };
 
   public async handle(c: AppContext) {
+    console.log("[ACTUALIZAR POST] Iniciando solicitud PUT /posts/:id");
     const data = await this.getValidatedData<typeof this.schema>();
+    console.log("[ACTUALIZAR POST] ID del post a actualizar:", data.params.id);
+    console.log("[ACTUALIZAR POST] Datos recibidos en el body:", JSON.stringify(data.body, null, 2));
+    
     const supabase = getSupabaseClient(c.env);
+    console.log("[ACTUALIZAR POST] Cliente de Supabase inicializado");
+    console.log("[ACTUALIZAR POST] Nombre de tabla:", PostModel.tableName);
 
-    // Prepare update data
+    // Preparar datos de actualización
     const updateData: Record<string, any> = {};
     if (data.body.title !== undefined) updateData.title = data.body.title;
     if (data.body.content !== undefined) updateData.content = data.body.content;
     if (data.body.author_id !== undefined) updateData.author_id = data.body.author_id;
     if (data.body.category_id !== undefined) updateData.category_id = data.body.category_id;
 
+    console.log("[ACTUALIZAR POST] Datos de actualización preparados:", JSON.stringify(updateData, null, 2));
+    console.log("[ACTUALIZAR POST] Campos a actualizar:", Object.keys(updateData).join(", "));
+
+    console.log("[ACTUALIZAR POST] Actualizando post en Supabase...");
     const { data: result, error } = await supabase
       .from(PostModel.tableName)
       .update(updateData)
@@ -63,7 +73,15 @@ export class PostUpdate extends OpenAPIRoute {
       .select()
       .single();
 
+    if (error) {
+      console.error("[ACTUALIZAR POST] ERROR al actualizar en Supabase:", error.message);
+      console.error("[ACTUALIZAR POST] Detalles del error:", JSON.stringify(error, null, 2));
+      console.error("[ACTUALIZAR POST] Código de error:", error.code);
+    }
+
     if (error || !result) {
+      console.warn("[ACTUALIZAR POST] Post no encontrado o actualización fallida");
+      console.warn("[ACTUALIZAR POST] ID buscado:", data.params.id);
       return c.json(
         {
           success: false,
@@ -73,8 +91,12 @@ export class PostUpdate extends OpenAPIRoute {
       );
     }
 
-    // Serialize the result
+    console.log("[ACTUALIZAR POST] Actualización exitosa");
+    console.log("[ACTUALIZAR POST] Resultado raw de Supabase:", JSON.stringify(result, null, 2));
+
+    // Serializar el resultado
     const serialized = PostModel.serializer(result);
+    console.log("[ACTUALIZAR POST] Resultado serializado:", JSON.stringify(serialized, null, 2));
 
     return c.json({
       success: true,

@@ -43,9 +43,15 @@ export class PostCreate extends OpenAPIRoute {
   };
 
   public async handle(c: AppContext) {
+    console.log("[CREAR POST] Iniciando solicitud POST /posts");
     const data = await this.getValidatedData<typeof this.schema>();
+    console.log("[CREAR POST] Datos recibidos en el body:", JSON.stringify(data.body, null, 2));
+    
     const supabase = getSupabaseClient(c.env);
+    console.log("[CREAR POST] Cliente de Supabase inicializado");
+    console.log("[CREAR POST] Nombre de tabla:", PostModel.tableName);
 
+    console.log("[CREAR POST] Insertando datos en Supabase...");
     const { data: result, error } = await supabase
       .from(PostModel.tableName)
       .insert([data.body])
@@ -53,6 +59,10 @@ export class PostCreate extends OpenAPIRoute {
       .single();
 
     if (error) {
+      console.error("[CREAR POST] ERROR al insertar en Supabase:", error.message);
+      console.error("[CREAR POST] Detalles del error:", JSON.stringify(error, null, 2));
+      console.error("[CREAR POST] Código de error:", error.code);
+      console.error("[CREAR POST] Datos que se intentaron insertar:", JSON.stringify(data.body, null, 2));
       return c.json(
         {
           success: false,
@@ -62,8 +72,13 @@ export class PostCreate extends OpenAPIRoute {
       );
     }
 
-    // Serialize the result
+    console.log("[CREAR POST] Inserción exitosa");
+    console.log("[CREAR POST] Resultado raw de Supabase:", JSON.stringify(result, null, 2));
+
+    // Serializar el resultado
     const serialized = PostModel.serializer(result);
+    console.log("[CREAR POST] Resultado serializado:", JSON.stringify(serialized, null, 2));
+    console.log("[CREAR POST] Post creado con ID:", serialized.id);
 
     return c.json(
       {
