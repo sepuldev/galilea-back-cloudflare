@@ -7,8 +7,10 @@
     "enabled": true
   },
   // Variables de entorno para Supabase
-  // Para desarrollo local, crea un archivo .dev.vars con:
-  // SUPABASE_URL=tu_supabase_url
-  // SUPABASE_ANON_KEY=tu_supabase_anon_key
+  // Nota: Para desarrollo local, también puedes usar el archivo .dev.vars
   // Para producción, configura estas variables en el dashboard de Cloudflare Workers
+  "vars": {
+    "SUPABASE_URL": "https://xwyameylqjbxglnsmfqu.supabase.co",
+    "SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh3eWFtZXlscWpieGdsbnNtZnF1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM0OTg1NzcsImV4cCI6MjA3OTA3NDU3N30.iS0UJh4Deqyfr9bghfu7CxA1ua3KJmLSgKc-O1ncn-A"
+  }
 }
