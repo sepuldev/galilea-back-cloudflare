@@ -43,23 +43,23 @@ export class ConsultationList extends OpenAPIRoute {
     let query = supabase.from(ConsultationModel.tableName).select("*");
     console.log("[LISTAR CONSULTAS] Consulta base creada: SELECT * FROM", ConsultationModel.tableName);
 
-    // Aplicar búsqueda si se proporciona (busca en message, user_name, user_email)
+    // Aplicar búsqueda si se proporciona (busca en consultation_reason, first_name, email)
     if (data.query.search) {
       const searchTerm = `%${data.query.search}%`;
-      const searchConditions = `message.ilike."${searchTerm}",user_name.ilike."${searchTerm}",user_email.ilike."${searchTerm}"`;
+      const searchConditions = `consultation_reason.ilike."${searchTerm}",first_name.ilike."${searchTerm}",email.ilike."${searchTerm}"`;
       query = query.or(searchConditions);
       console.log("[LISTAR CONSULTAS] Filtro de búsqueda aplicado:", searchConditions);
     }
 
-    // Filtrar por user_email si se proporciona
+    // Filtrar por email si se proporciona
     if (data.query.user_email) {
-      query = query.eq("user_email", data.query.user_email);
+      query = query.eq("email", data.query.user_email);
       console.log("[LISTAR CONSULTAS] Filtro por email aplicado:", data.query.user_email);
     }
 
-    // Filtrar por user_dni si se proporciona
+    // Filtrar por dni_or_id si se proporciona
     if (data.query.user_dni) {
-      query = query.eq("user_dni", data.query.user_dni);
+      query = query.eq("dni_or_id", data.query.user_dni);
       console.log("[LISTAR CONSULTAS] Filtro por DNI aplicado:", data.query.user_dni);
     }
 

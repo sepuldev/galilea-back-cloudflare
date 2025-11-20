@@ -1,8 +1,26 @@
 import { contentJson, OpenAPIRoute } from "chanfana";
 import { AppContext } from "../../types";
 import { ConsultationModel } from "./base";
-import { getSupabaseClient } from "../../supabase";
+import { getSupabaseServiceClient } from "../../supabase";
 import { z } from "zod";
+
+// Schema para aceptar datos del formulario (frontend)
+// Ahora coincide directamente con los nombres de las columnas de la BD
+const consultationRequestSchema = z.object({
+  first_name: z.string().min(1, "El nombre es requerido"),
+  last_name: z.string().optional(),
+  email: z.string().email("Email inválido"),
+  phone_number: z.string().min(1, "El número de teléfono es requerido"),
+  dni_or_id: z.string().optional(),
+  nationality: z.string().optional(),
+  consultation_reason: z.string().min(1, "El motivo de consulta es requerido"),
+});
+
+// Schema que acepta el wrapper "data" del frontend o directamente los datos
+const consultationRequestBodySchema = z.union([
+  z.object({ data: consultationRequestSchema }),
+  consultationRequestSchema,
+]);
 
 export class ConsultationCreate extends OpenAPIRoute {
   public schema = {
@@ -10,18 +28,7 @@ export class ConsultationCreate extends OpenAPIRoute {
     summary: "Crear una nueva consulta",
     operationId: "create-consultation",
     request: {
-      body: contentJson(
-        ConsultationModel.schema.pick({
-          user_dni: true,
-          user_email: true,
-          message: true,
-          user_name: true,
-          phone_number: true,
-          status: true,
-          user_lastname: true,
-          nacionality: true,
-        }),
-      ),
+      body: contentJson(consultationRequestBodySchema),
     },
     responses: {
       "201": {
@@ -48,17 +55,48 @@ export class ConsultationCreate extends OpenAPIRoute {
 
   public async handle(c: AppContext) {
     console.log("[CREAR CONSULTA] Iniciando solicitud POST /consultations");
-    const data = await this.getValidatedData<typeof this.schema>();
-    console.log("[CREAR CONSULTA] Datos recibidos en el body:", JSON.stringify(data.body, null, 2));
+    const validatedData = await this.getValidatedData<typeof this.schema>();
+    console.log("[CREAR CONSULTA] Datos recibidos en el body:", JSON.stringify(validatedData.body, null, 2));
     
-    const supabase = getSupabaseClient(c.env);
-    console.log("[CREAR CONSULTA] Cliente de Supabase inicializado");
+    // Extraer los datos del wrapper "data" si existe, o usar directamente
+    const formData = "data" in validatedData.body 
+      ? validatedData.body.data 
+      : validatedData.body;
+    
+    console.log("[CREAR CONSULTA] Datos extraídos del formulario:", JSON.stringify(formData, null, 2));
+    
+    // Los datos ya coinciden con los nombres de las columnas, solo necesitamos limpiar campos opcionales
+    const consultationData: Record<string, any> = {
+      first_name: formData.first_name,
+      email: formData.email,
+      phone_number: formData.phone_number,
+      consultation_reason: formData.consultation_reason,
+    };
+
+    // Campos opcionales - solo agregar si tienen valor
+    if (formData.last_name && formData.last_name.trim() !== '') {
+      consultationData.last_name = formData.last_name;
+    }
+    
+    if (formData.dni_or_id && formData.dni_or_id.trim() !== '') {
+      consultationData.dni_or_id = formData.dni_or_id;
+    }
+    
+    if (formData.nationality && formData.nationality.trim() !== '') {
+      consultationData.nationality = formData.nationality;
+    }
+
+    console.log("[CREAR CONSULTA] Datos transformados para Supabase:", JSON.stringify(consultationData, null, 2));
+    
+    // Usar Service Role Key para operaciones de escritura (bypass RLS)
+    const supabase = getSupabaseServiceClient(c.env);
+    console.log("[CREAR CONSULTA] Cliente de Supabase inicializado (SERVICE_ROLE_KEY)");
     console.log("[CREAR CONSULTA] Nombre de tabla:", ConsultationModel.tableName);
 
     console.log("[CREAR CONSULTA] Insertando datos en Supabase...");
     const { data: result, error } = await supabase
       .from(ConsultationModel.tableName)
-      .insert([data.body])
+      .insert([consultationData])
       .select()
       .single();
 
@@ -66,7 +104,7 @@ export class ConsultationCreate extends OpenAPIRoute {
       console.error("[CREAR CONSULTA] ERROR al insertar en Supabase:", error.message);
       console.error("[CREAR CONSULTA] Detalles del error:", JSON.stringify(error, null, 2));
       console.error("[CREAR CONSULTA] Código de error:", error.code);
-      console.error("[CREAR CONSULTA] Datos que se intentaron insertar:", JSON.stringify(data.body, null, 2));
+      console.error("[CREAR CONSULTA] Datos que se intentaron insertar:", JSON.stringify(consultationData, null, 2));
       return c.json(
         {
           success: false,

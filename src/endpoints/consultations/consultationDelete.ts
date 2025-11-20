@@ -1,7 +1,7 @@
 import { contentJson, OpenAPIRoute } from "chanfana";
 import { AppContext } from "../../types";
 import { ConsultationModel } from "./base";
-import { getSupabaseClient } from "../../supabase";
+import { getSupabaseServiceClient } from "../../supabase";
 import { z } from "zod";
 
 export class ConsultationDelete extends OpenAPIRoute {
@@ -42,8 +42,9 @@ export class ConsultationDelete extends OpenAPIRoute {
     const data = await this.getValidatedData<typeof this.schema>();
     console.log("[ELIMINAR CONSULTA] ID de la consulta a eliminar:", data.params.id);
     
-    const supabase = getSupabaseClient(c.env);
-    console.log("[ELIMINAR CONSULTA] Cliente de Supabase inicializado");
+    // Usar Service Role Key para operaciones de escritura (bypass RLS)
+    const supabase = getSupabaseServiceClient(c.env);
+    console.log("[ELIMINAR CONSULTA] Cliente de Supabase inicializado (SERVICE_ROLE_KEY)");
     console.log("[ELIMINAR CONSULTA] Nombre de tabla:", ConsultationModel.tableName);
 
     // Primero, verificar si la consulta existe
