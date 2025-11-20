@@ -1,17 +1,19 @@
 import { contentJson, OpenAPIRoute } from "chanfana";
 import { AppContext } from "../../types";
-import { TaskModel } from "./base";
+import { PostModel } from "./base";
 import { getSupabaseClient } from "../../supabase";
 import { z } from "zod";
 
-export class TaskList extends OpenAPIRoute {
+export class PostList extends OpenAPIRoute {
   public schema = {
-    tags: ["Tasks"],
-    summary: "List all tasks with optional search and pagination",
-    operationId: "list-tasks",
+    tags: ["Posts"],
+    summary: "List all posts with optional filtering and pagination",
+    operationId: "list-posts",
     request: {
       query: z.object({
         search: z.string().optional(),
+        author_id: z.string().uuid().optional(),
+        category_id: z.string().optional().transform((val) => val ? parseInt(val, 10) : undefined),
         limit: z.string().optional().transform((val) => val ? parseInt(val, 10) : undefined),
         offset: z.string().optional().transform((val) => val ? parseInt(val, 10) : undefined),
         orderBy: z.string().optional(),
@@ -19,10 +21,10 @@ export class TaskList extends OpenAPIRoute {
     },
     responses: {
       "200": {
-        description: "Tasks retrieved successfully",
+        description: "Posts retrieved successfully",
         ...contentJson({
           success: Boolean,
-          result: z.array(TaskModel.schema),
+          result: z.array(PostModel.schema),
         }),
       },
     },
@@ -32,19 +34,27 @@ export class TaskList extends OpenAPIRoute {
     const data = await this.getValidatedData<typeof this.schema>();
     const supabase = getSupabaseClient(c.env);
 
-    let query = supabase.from(TaskModel.tableName).select("*");
+    let query = supabase.from(PostModel.tableName).select("*");
 
-    // Apply search if provided
+    // Apply search if provided (search in title and content)
     if (data.query.search) {
       const searchTerm = `%${data.query.search}%`;
-      // Supabase .or() syntax: field1.ilike.value,field2.ilike.value
-      // Note: values with special characters need to be properly escaped
-      const searchConditions = `name.ilike."${searchTerm}",slug.ilike."${searchTerm}",description.ilike."${searchTerm}"`;
+      const searchConditions = `title.ilike."${searchTerm}",content.ilike."${searchTerm}"`;
       query = query.or(searchConditions);
     }
 
-    // Apply ordering (default: id DESC)
-    const orderBy = data.query.orderBy || "id DESC";
+    // Filter by author_id if provided
+    if (data.query.author_id) {
+      query = query.eq("author_id", data.query.author_id);
+    }
+
+    // Filter by category_id if provided
+    if (data.query.category_id !== undefined) {
+      query = query.eq("category_id", data.query.category_id);
+    }
+
+    // Apply ordering (default: created_at DESC)
+    const orderBy = data.query.orderBy || "created_at DESC";
     const [orderField, orderDirection] = orderBy.split(" ");
     query = query.order(orderField, {
       ascending: orderDirection?.toLowerCase() !== "desc",
@@ -54,11 +64,9 @@ export class TaskList extends OpenAPIRoute {
     if (data.query.limit) {
       query = query.limit(data.query.limit);
     }
-    if (data.query.offset) {
-      query = query.range(
-        data.query.offset,
-        data.query.offset + (data.query.limit || 100) - 1,
-      );
+    if (data.query.offset !== undefined) {
+      const end = data.query.offset + (data.query.limit || 100) - 1;
+      query = query.range(data.query.offset, end);
     }
 
     const { data: results, error } = await query;
@@ -75,7 +83,7 @@ export class TaskList extends OpenAPIRoute {
 
     // Serialize all results
     const serialized = (results || []).map((result) =>
-      TaskModel.serializer(result),
+      PostModel.serializer(result),
     );
 
     return c.json({
@@ -84,3 +92,4 @@ export class TaskList extends OpenAPIRoute {
     });
   }
 }
+

@@ -11,7 +11,7 @@ This is a Cloudflare Worker with OpenAPI 3.1 Auto Generation and Validation usin
 This is an example project made to be used as a quick start into building OpenAPI compliant Workers that generates the
 `openapi.json` schema automatically from code and validates the incoming request to the defined parameters or request body.
 
-This template includes various endpoints, a D1 database, and integration tests using [Vitest](https://vitest.dev/) as examples. In endpoints, you will find [chanfana D1 AutoEndpoints](https://chanfana.com/endpoints/auto/d1) and a [normal endpoint](https://chanfana.com/endpoints/defining-endpoints) to serve as examples for your projects.
+This template includes various endpoints, a Supabase database, and integration tests using [Vitest](https://vitest.dev/) as examples. In endpoints, you will find custom endpoints using Supabase and a [normal endpoint](https://chanfana.com/endpoints/defining-endpoints) to serve as examples for your projects.
 
 Besides being able to see the OpenAPI schema (openapi.json) in the browser, you can also extract the schema locally no hassle by running this command `npm run schema`.
 
@@ -36,20 +36,28 @@ A live public deployment of this template is available at [https://openapi-templ
    ```bash
    npm install
    ```
-2. Create a [D1 database](https://developers.cloudflare.com/d1/get-started/) with the name "openapi-template-db":
+2. Create a [Supabase](https://supabase.com/) project:
+   - Go to [supabase.com](https://supabase.com/) and create a new project
+   - Note your project URL and anon key from the project settings
+3. Set up the database:
+   - Go to the SQL Editor in your Supabase dashboard
+   - Run the SQL script from `supabase-migration.sql` to create the `tasks` table
+4. Configure environment variables:
+   - For local development, copy `.dev.vars.example` to `.dev.vars`:
+     ```bash
+     cp .dev.vars.example .dev.vars
+     ```
+   - Fill in your Supabase credentials in `.dev.vars`:
+     ```
+     SUPABASE_URL=https://tu-proyecto.supabase.co
+     SUPABASE_ANON_KEY=tu_clave_anonima_aqui
+     ```
+   - For production, set these variables in the Cloudflare Workers dashboard under Settings > Variables
+5. Deploy the project!
    ```bash
-   npx wrangler d1 create openapi-template-db
+   npm run deploy
    ```
-   ...and update the `database_id` field in `wrangler.json` with the new database ID.
-3. Run the following db migration to initialize the database (notice the `migrations` directory in this project):
-   ```bash
-   npx wrangler d1 migrations apply DB --remote
-   ```
-4. Deploy the project!
-   ```bash
-   npx wrangler deploy
-   ```
-5. Monitor your worker
+6. Monitor your worker
    ```bash
    npx wrangler tail
    ```

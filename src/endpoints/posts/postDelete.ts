@@ -1,29 +1,29 @@
 import { contentJson, OpenAPIRoute } from "chanfana";
 import { AppContext } from "../../types";
-import { TaskModel } from "./base";
+import { PostModel } from "./base";
 import { getSupabaseClient } from "../../supabase";
 import { z } from "zod";
 
-export class TaskDelete extends OpenAPIRoute {
+export class PostDelete extends OpenAPIRoute {
   public schema = {
-    tags: ["Tasks"],
-    summary: "Delete a task by ID",
-    operationId: "delete-task",
+    tags: ["Posts"],
+    summary: "Delete a post by ID",
+    operationId: "delete-post",
     request: {
       params: z.object({
-        id: z.string().transform((val) => parseInt(val, 10)),
+        id: z.string().uuid(),
       }),
     },
     responses: {
       "200": {
-        description: "Task deleted successfully",
+        description: "Post deleted successfully",
         ...contentJson({
           success: Boolean,
-          result: z.object({ id: z.number() }),
+          result: z.object({ id: z.string().uuid() }),
         }),
       },
       "404": {
-        description: "Task not found",
+        description: "Post not found",
         ...contentJson({
           success: Boolean,
           errors: z.array(
@@ -41,14 +41,14 @@ export class TaskDelete extends OpenAPIRoute {
     const data = await this.getValidatedData<typeof this.schema>();
     const supabase = getSupabaseClient(c.env);
 
-    // First, check if the task exists
-    const { data: existingTask, error: fetchError } = await supabase
-      .from(TaskModel.tableName)
+    // First, check if the post exists
+    const { data: existingPost, error: fetchError } = await supabase
+      .from(PostModel.tableName)
       .select("id")
       .eq("id", data.params.id)
       .single();
 
-    if (fetchError || !existingTask) {
+    if (fetchError || !existingPost) {
       return c.json(
         {
           success: false,
@@ -58,9 +58,9 @@ export class TaskDelete extends OpenAPIRoute {
       );
     }
 
-    // Delete the task
+    // Delete the post
     const { error } = await supabase
-      .from(TaskModel.tableName)
+      .from(PostModel.tableName)
       .delete()
       .eq("id", data.params.id);
 
@@ -80,3 +80,4 @@ export class TaskDelete extends OpenAPIRoute {
     });
   }
 }
+

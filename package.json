@@ -1,12 +1,11 @@
 {
   "name": "galilea-back-cloudflare",
-  "description": "Complete backend API template using Hono + Chanfana + D1 + Vitest.",
+  "description": "Complete backend API template using Hono + Chanfana + Supabase + Vitest.",
   "private": true,
   "cloudflare": {
     "label": "Backend OpenAPI Template",
     "products": [
-      "Workers",
-      "D1"
+      "Workers"
     ],
     "categories": [
       "storage"
@@ -19,13 +18,12 @@
   "scripts": {
     "cf-typegen": "wrangler types",
     "deploy": "wrangler deploy",
-    "dev": "pnpm seedLocalDb && wrangler dev",
-    "predeploy": "wrangler d1 migrations apply DB --remote",
-    "seedLocalDb": "wrangler d1 migrations apply DB --local",
+    "dev": "wrangler dev",
     "schema": "npx chanfana",
     "test": "wrangler deploy --dry-run && npx vitest run --config tests/vitest.config.mts"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.39.0",
     "chanfana": "2.8.1",
     "hono": "4.8.2",
     "zod": "3.25.67"

@@ -1,29 +1,29 @@
 import { contentJson, OpenAPIRoute } from "chanfana";
 import { AppContext } from "../../types";
-import { TaskModel } from "./base";
+import { PostModel } from "./base";
 import { getSupabaseClient } from "../../supabase";
 import { z } from "zod";
 
-export class TaskDelete extends OpenAPIRoute {
+export class PostRead extends OpenAPIRoute {
   public schema = {
-    tags: ["Tasks"],
-    summary: "Delete a task by ID",
-    operationId: "delete-task",
+    tags: ["Posts"],
+    summary: "Get a post by ID",
+    operationId: "get-post",
     request: {
       params: z.object({
-        id: z.string().transform((val) => parseInt(val, 10)),
+        id: z.string().uuid(),
       }),
     },
     responses: {
       "200": {
-        description: "Task deleted successfully",
+        description: "Post retrieved successfully",
         ...contentJson({
           success: Boolean,
-          result: z.object({ id: z.number() }),
+          result: PostModel.schema,
         }),
       },
       "404": {
-        description: "Task not found",
+        description: "Post not found",
         ...contentJson({
           success: Boolean,
           errors: z.array(
@@ -41,14 +41,13 @@ export class TaskDelete extends OpenAPIRoute {
     const data = await this.getValidatedData<typeof this.schema>();
     const supabase = getSupabaseClient(c.env);
 
-    // First, check if the task exists
-    const { data: existingTask, error: fetchError } = await supabase
-      .from(TaskModel.tableName)
-      .select("id")
+    const { data: result, error } = await supabase
+      .from(PostModel.tableName)
+      .select("*")
       .eq("id", data.params.id)
       .single();
 
-    if (fetchError || !existingTask) {
+    if (error || !result) {
       return c.json(
         {
           success: false,
@@ -58,25 +57,13 @@ export class TaskDelete extends OpenAPIRoute {
       );
     }
 
-    // Delete the task
-    const { error } = await supabase
-      .from(TaskModel.tableName)
-      .delete()
-      .eq("id", data.params.id);
-
-    if (error) {
-      return c.json(
-        {
-          success: false,
-          errors: [{ code: 500, message: error.message }],
-        },
-        500,
-      );
-    }
+    // Serialize the result
+    const serialized = PostModel.serializer(result);
 
     return c.json({
       success: true,
-      result: { id: data.params.id },
+      result: serialized,
     });
   }
 }
+

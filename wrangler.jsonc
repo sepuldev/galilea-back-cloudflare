@@ -6,11 +6,9 @@
   "observability": {
     "enabled": true
   },
-  "d1_databases": [
-    {
-      "binding": "DB",
-      "database_name": "borrar-bbdd",
-      "database_id": "b4f6472b-c941-41ef-b6e6-5d0adb938a16"
-    }
-  ]
+  // Variables de entorno para Supabase
+  // Para desarrollo local, crea un archivo .dev.vars con:
+  // SUPABASE_URL=tu_supabase_url
+  // SUPABASE_ANON_KEY=tu_supabase_anon_key
+  // Para producción, configura estas variables en el dashboard de Cloudflare Workers
 }

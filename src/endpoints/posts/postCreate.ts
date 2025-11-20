@@ -1,31 +1,30 @@
 import { contentJson, OpenAPIRoute } from "chanfana";
 import { AppContext } from "../../types";
-import { TaskModel } from "./base";
+import { PostModel } from "./base";
 import { getSupabaseClient } from "../../supabase";
 import { z } from "zod";
 
-export class TaskCreate extends OpenAPIRoute {
+export class PostCreate extends OpenAPIRoute {
   public schema = {
-    tags: ["Tasks"],
-    summary: "Create a new task",
-    operationId: "create-task",
+    tags: ["Posts"],
+    summary: "Create a new post",
+    operationId: "create-post",
     request: {
       body: contentJson(
-        TaskModel.schema.pick({
-          name: true,
-          slug: true,
-          description: true,
-          completed: true,
-          due_date: true,
+        PostModel.schema.pick({
+          title: true,
+          content: true,
+          author_id: true,
+          category_id: true,
         }),
       ),
     },
     responses: {
       "201": {
-        description: "Task created successfully",
+        description: "Post created successfully",
         ...contentJson({
           success: Boolean,
-          result: TaskModel.schema,
+          result: PostModel.schema,
         }),
       },
       "400": {
@@ -47,18 +46,9 @@ export class TaskCreate extends OpenAPIRoute {
     const data = await this.getValidatedData<typeof this.schema>();
     const supabase = getSupabaseClient(c.env);
 
-    // Convert completed boolean to integer for PostgreSQL
-    const taskData = {
-      name: data.body.name,
-      slug: data.body.slug,
-      description: data.body.description,
-      completed: data.body.completed ? 1 : 0,
-      due_date: data.body.due_date,
-    };
-
     const { data: result, error } = await supabase
-      .from(TaskModel.tableName)
-      .insert(taskData)
+      .from(PostModel.tableName)
+      .insert([data.body])
       .select()
       .single();
 
@@ -72,8 +62,8 @@ export class TaskCreate extends OpenAPIRoute {
       );
     }
 
-    // Serialize the result (convert completed back to boolean)
-    const serialized = TaskModel.serializer(result);
+    // Serialize the result
+    const serialized = PostModel.serializer(result);
 
     return c.json(
       {
@@ -84,3 +74,4 @@ export class TaskCreate extends OpenAPIRoute {
     );
   }
 }
+

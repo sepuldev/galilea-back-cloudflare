@@ -1,38 +1,37 @@
 import { contentJson, OpenAPIRoute } from "chanfana";
 import { AppContext } from "../../types";
-import { TaskModel } from "./base";
+import { PostModel } from "./base";
 import { getSupabaseClient } from "../../supabase";
 import { z } from "zod";
 
-export class TaskUpdate extends OpenAPIRoute {
+export class PostUpdate extends OpenAPIRoute {
   public schema = {
-    tags: ["Tasks"],
-    summary: "Update a task by ID",
-    operationId: "update-task",
+    tags: ["Posts"],
+    summary: "Update a post by ID",
+    operationId: "update-post",
     request: {
       params: z.object({
-        id: z.string().transform((val) => parseInt(val, 10)),
+        id: z.string().uuid(),
       }),
       body: contentJson(
-        TaskModel.schema.pick({
-          name: true,
-          slug: true,
-          description: true,
-          completed: true,
-          due_date: true,
+        PostModel.schema.pick({
+          title: true,
+          content: true,
+          author_id: true,
+          category_id: true,
         }).partial(),
       ),
     },
     responses: {
       "200": {
-        description: "Task updated successfully",
+        description: "Post updated successfully",
         ...contentJson({
           success: Boolean,
-          result: TaskModel.schema,
+          result: PostModel.schema,
         }),
       },
       "404": {
-        description: "Task not found",
+        description: "Post not found",
         ...contentJson({
           success: Boolean,
           errors: z.array(
@@ -50,19 +49,15 @@ export class TaskUpdate extends OpenAPIRoute {
     const data = await this.getValidatedData<typeof this.schema>();
     const supabase = getSupabaseClient(c.env);
 
-    // Prepare update data, converting completed boolean to integer if present
+    // Prepare update data
     const updateData: Record<string, any> = {};
-    if (data.body.name !== undefined) updateData.name = data.body.name;
-    if (data.body.slug !== undefined) updateData.slug = data.body.slug;
-    if (data.body.description !== undefined)
-      updateData.description = data.body.description;
-    if (data.body.completed !== undefined)
-      updateData.completed = data.body.completed ? 1 : 0;
-    if (data.body.due_date !== undefined)
-      updateData.due_date = data.body.due_date;
+    if (data.body.title !== undefined) updateData.title = data.body.title;
+    if (data.body.content !== undefined) updateData.content = data.body.content;
+    if (data.body.author_id !== undefined) updateData.author_id = data.body.author_id;
+    if (data.body.category_id !== undefined) updateData.category_id = data.body.category_id;
 
     const { data: result, error } = await supabase
-      .from(TaskModel.tableName)
+      .from(PostModel.tableName)
       .update(updateData)
       .eq("id", data.params.id)
       .select()
@@ -79,7 +74,7 @@ export class TaskUpdate extends OpenAPIRoute {
     }
 
     // Serialize the result
-    const serialized = TaskModel.serializer(result);
+    const serialized = PostModel.serializer(result);
 
     return c.json({
       success: true,
@@ -87,3 +82,4 @@ export class TaskUpdate extends OpenAPIRoute {
     });
   }
 }
+

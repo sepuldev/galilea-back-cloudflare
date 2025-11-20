@@ -3,7 +3,8 @@
 // Runtime types generated with workerd@1.20250617.0 2025-10-08 
 declare namespace Cloudflare {
 	interface Env {
-		DB: D1Database;
+		SUPABASE_URL: string;
+		SUPABASE_ANON_KEY: string;
 	}
 }
 interface Env extends Cloudflare.Env {}
