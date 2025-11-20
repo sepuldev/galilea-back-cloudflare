@@ -1,5 +1,6 @@
 import { ApiException, fromHono } from "chanfana";
 import { Hono } from "hono";
+import { cors } from "hono/cors";
 import { postsRouter } from "./endpoints/posts/router";
 import { ContentfulStatusCode } from "hono/utils/http-status";
 import { DummyEndpoint } from "./endpoints/dummyEndpoint";
@@ -7,8 +8,26 @@ import { DummyEndpoint } from "./endpoints/dummyEndpoint";
 // Start a Hono app
 const app = new Hono<{ Bindings: Env }>();
 
+// Configurar CORS - Permitir peticiones desde localhost:3000 y otros orígenes
+app.use(
+  "*",
+  cors({
+    origin: [
+      "http://localhost:3000",
+      "http://127.0.0.1:3000",
+      "http://localhost:3001",
+      "http://127.0.0.1:3001",
+    ],
+    allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowHeaders: ["Content-Type", "Authorization"],
+    exposeHeaders: ["Content-Length"],
+    maxAge: 600,
+    credentials: true,
+  }),
+);
+
 app.onError((err, c) => {
-  if (err instanceof ApiException) {
+ if (err instanceof ApiException) {
     // If it's a Chanfana ApiException, let Chanfana handle the response
     return c.json(
       { success: false, errors: err.buildResponse() },
@@ -28,7 +47,7 @@ app.onError((err, c) => {
   );
 });
 
-// Setup OpenAPI registry
+// Setup OpenAPI registry --> Esto genera documentación automáticamente
 const openapi = fromHono(app, {
   docs_url: "/",
   schema: {
