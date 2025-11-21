@@ -17,12 +17,14 @@ export const PostModel = {
   tableName: "posts", // Nombre de la tabla en la base de datos
   primaryKeys: ["id"], // Clave primaria de la tabla
   schema: post, // Esquema de la tabla
-  serializer: (obj: Record<string, string | number | boolean | null | undefined>) => { // Serializador de la tabla
+  serializer: (obj: Record<string, string | number | boolean | null | undefined>): Record<string, string | number | boolean | null | undefined> => { // Serializador de la tabla
     // Excluir campos que no están en el schema (como el objeto categories del JOIN)
     const { categories, ...rest } = obj;
-    return { // Retorna el objeto serializado
+    // Asegurar que image_url se preserve explícitamente (incluso si es null o undefined)
+    const imageUrl = 'image_url' in obj ? obj.image_url : null;
+    return {
       ...rest,
-      // No hay conversiones especiales necesarias para posts
+      image_url: imageUrl, // Preservar image_url explícitamente
     };
   },
   serializerObject: post,
