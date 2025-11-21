@@ -27,12 +27,61 @@ const app = new Hono<{ Bindings: Env }>();
  * 
  * La configuración se obtiene dinámicamente desde variables de entorno en cada request
  */
+// Manejar peticiones OPTIONS (preflight) antes del middleware de CORS
+app.options("*", async (c) => {
+  const corsConfig = getCorsConfig(c.env);
+  const origin = c.req.header("Origin");
+
+  console.log(`[CORS] Preflight request desde: ${origin}`);
+  console.log(`[CORS] Orígenes permitidos: ${corsConfig.origin.join(', ')}`);
+
+  // Verificar si el origen está permitido
+  let allowedOrigin: string | null = null;
+
+  if (!origin) {
+    allowedOrigin = corsConfig.origin[0] || "*";
+  } else {
+    const isAllowed = corsConfig.origin.some(allowedOriginPattern => {
+      if (allowedOriginPattern === origin) return true;
+      // Soporte para wildcards (ej: *.vercel.app)
+      if (allowedOriginPattern.includes('*')) {
+        const pattern = allowedOriginPattern.replace(/\*/g, '.*');
+        const regex = new RegExp(`^${pattern}$`);
+        return regex.test(origin);
+      }
+      return false;
+    });
+
+    if (isAllowed) {
+      allowedOrigin = origin;
+      console.log(`[CORS] Preflight permitido para: ${origin}`);
+    } else {
+      console.warn(`[CORS] Preflight bloqueado para: ${origin}`);
+      allowedOrigin = null;
+    }
+  }
+
+  if (allowedOrigin) {
+    return c.body(null, 204, {
+      "Access-Control-Allow-Origin": allowedOrigin,
+      "Access-Control-Allow-Methods": corsConfig.allowMethods.join(", "),
+      "Access-Control-Allow-Headers": corsConfig.allowHeaders.join(", "),
+      "Access-Control-Expose-Headers": corsConfig.exposeHeaders.join(", "),
+      "Access-Control-Max-Age": corsConfig.maxAge.toString(),
+      "Access-Control-Allow-Credentials": corsConfig.credentials ? "true" : "false",
+    });
+  } else {
+    return c.json({ error: "CORS policy: Origin not allowed" }, 403);
+  }
+});
+
 app.use(
   "*",
   async (c, next) => {
     // Obtener configuración de CORS desde variables de entorno
     const corsConfig = getCorsConfig(c.env);
-    
+    const origin = c.req.header("Origin");
+
     // Aplicar middleware de CORS con la configuración obtenida
     const corsMiddleware = cors({
       origin: (origin: string) => {
@@ -52,7 +101,7 @@ app.use(
           }
           return false;
         });
-        
+
         if (isAllowed) {
           console.log(`[CORS] Origen permitido: ${origin}`);
           return origin;
@@ -68,13 +117,13 @@ app.use(
       maxAge: corsConfig.maxAge,
       credentials: corsConfig.credentials,
     });
-    
+
     return corsMiddleware(c, next);
   },
 );
 
 app.onError((err, c) => {
- if (err instanceof ApiException) {
+  if (err instanceof ApiException) {
     // If it's a Chanfana ApiException, let Chanfana handle the response
     return c.json(
       { success: false, errors: err.buildResponse() },
