@@ -35,8 +35,17 @@ export class PostList extends OpenAPIRoute {
     console.log("[LISTAR POSTS] Cliente de Supabase inicializado");
     console.log("[LISTAR POSTS] Nombre de tabla:", PostModel.tableName);
 
-    let query = supabase.from(PostModel.tableName).select("*");
-    console.log("[LISTAR POSTS] Consulta base creada: SELECT * FROM", PostModel.tableName);
+    // Hacer JOIN con categories para obtener el nombre de la categoría
+    // Intentamos diferentes sintaxis según cómo esté configurada la relación en Supabase
+    let query = supabase
+      .from(PostModel.tableName)
+      .select(`
+        *,
+        categories (
+          name
+        )
+      `);
+    console.log("[LISTAR POSTS] Consulta base creada con JOIN a categories (sintaxis: categories(name))");
 
     // Aplicar búsqueda si se proporciona (busca en título y contenido)
     if (data.query.search) {
@@ -97,17 +106,135 @@ export class PostList extends OpenAPIRoute {
     console.log("[LISTAR POSTS] Consulta ejecutada exitosamente");
     console.log("[LISTAR POSTS] Cantidad de resultados raw:", results?.length || 0);
     if (results && results.length > 0) {
-      console.log("[LISTAR POSTS] Primer resultado raw:", JSON.stringify(results[0], null, 2));
+      console.log("[LISTAR POSTS] Primer resultado raw completo:", JSON.stringify(results[0], null, 2));
+      console.log("[LISTAR POSTS] ¿Tiene categories?:", !!results[0].categories);
+      console.log("[LISTAR POSTS] Tipo de categories:", typeof results[0].categories);
+      if (results[0].categories) {
+        console.log("[LISTAR POSTS] Categories value:", JSON.stringify(results[0].categories, null, 2));
+      }
     } else {
       console.warn("[LISTAR POSTS] ADVERTENCIA: No se encontraron resultados");
     }
 
-    // Serializar todos los resultados
-    const serialized = (results || []).map((result) =>
-      PostModel.serializer(result),
-    );
+    // Serializar todos los resultados primero, excluyendo el objeto categories del JOIN
+    const serialized = (results || []).map((result) => {
+      const { categories, ...rest } = result;
+      return PostModel.serializer(rest);
+    });
+
+    // Obtener category_name: primero intentar del JOIN, si no funciona hacer consulta separada
+    const categoryIds = [...new Set(serialized.map(p => p.category_id).filter(id => id != null))];
+    console.log("[LISTAR POSTS] Category IDs encontrados:", categoryIds);
+    
+    if (categoryIds.length > 0) {
+      // Intentar extraer del JOIN primero
+      let categoryMap = new Map<number, string>();
+      
+      if (results && results.length > 0 && results[0].categories) {
+        console.log("[LISTAR POSTS] Intentando extraer category_name del JOIN...");
+        results.forEach((result) => {
+          if (result.categories && result.category_id) {
+            let categoryName: string | undefined;
+            if (Array.isArray(result.categories) && result.categories.length > 0) {
+              categoryName = result.categories[0]?.name;
+            } else if (typeof result.categories === 'object' && result.categories !== null && 'name' in result.categories) {
+              categoryName = (result.categories as any).name;
+            }
+            if (categoryName) {
+              categoryMap.set(result.category_id, categoryName);
+            }
+          }
+        });
+        console.log("[LISTAR POSTS] Categorías extraídas del JOIN:", Array.from(categoryMap.entries()));
+      }
+      
+      // Si no se obtuvieron nombres del JOIN, hacer consulta separada
+      if (categoryMap.size === 0) {
+        console.log("[LISTAR POSTS] No se obtuvo category_name del JOIN, haciendo consulta separada a categories...");
+        console.log("[LISTAR POSTS] Buscando categorías con IDs:", categoryIds);
+        
+        // Intentar diferentes nombres de tabla posibles
+        const possibleTableNames = ["categories", "category"];
+        let categories: any[] | null = null;
+        let categoriesError: any = null;
+        
+        for (const tableName of possibleTableNames) {
+          console.log(`[LISTAR POSTS] Intentando consultar tabla: ${tableName}`);
+          const result = await supabase
+            .from(tableName)
+            .select("id, name")
+            .in("id", categoryIds);
+          
+          categories = result.data;
+          categoriesError = result.error;
+          
+          console.log(`[LISTAR POSTS] Resultado de consulta a ${tableName}:`);
+          console.log(`[LISTAR POSTS] - Error:`, categoriesError ? JSON.stringify(categoriesError, null, 2) : "null");
+          console.log(`[LISTAR POSTS] - Data:`, categories ? JSON.stringify(categories, null, 2) : "null");
+          console.log(`[LISTAR POSTS] - Cantidad de categorías:`, categories?.length || 0);
+          
+          if (categoriesError) {
+            console.error(`[LISTAR POSTS] Error al obtener categorías de ${tableName}:`, JSON.stringify(categoriesError, null, 2));
+            if (categoriesError.code === '42P01') {
+              console.error(`[LISTAR POSTS] La tabla ${tableName} no existe. Probando siguiente opción...`);
+              continue; // Intentar siguiente nombre de tabla
+            }
+          }
+          
+          if (!categoriesError && categories && categories.length > 0) {
+            console.log(`[LISTAR POSTS] Categorías obtenidas de ${tableName}:`, JSON.stringify(categories, null, 2));
+            break; // Encontramos datos, salir del loop
+          }
+        }
+        
+        if (categoriesError && categoriesError.code === '42P01') {
+          console.error("[LISTAR POSTS] ERROR CRÍTICO: No se encontró la tabla de categorías. Verificar en Supabase:");
+          console.error("[LISTAR POSTS] - ¿Existe la tabla 'categories' o 'category'?");
+          console.error("[LISTAR POSTS] - ¿Está habilitado RLS y hay políticas que permitan la lectura?");
+        } else if (!categoriesError && categories && categories.length > 0) {
+          categories.forEach(cat => {
+            categoryMap.set(cat.id, cat.name);
+          });
+          console.log("[LISTAR POSTS] Mapa de categorías creado:", Array.from(categoryMap.entries()));
+        } else if (!categoriesError && (!categories || categories.length === 0)) {
+          console.warn("[LISTAR POSTS] ADVERTENCIA: La consulta a categories no devolvió resultados.");
+          console.warn("[LISTAR POSTS] Posibles causas:");
+          console.warn("[LISTAR POSTS] 1. Row Level Security (RLS) está habilitado sin políticas de lectura");
+          console.warn("[LISTAR POSTS] 2. La tabla está vacía");
+          console.warn("[LISTAR POSTS] 3. Los IDs buscados", categoryIds, "no existen en la tabla");
+          
+          // Intentar consulta sin filtro para diagnosticar
+          const { data: allCategories, error: allCategoriesError } = await supabase
+            .from("categories")
+            .select("id, name")
+            .limit(10);
+          
+          if (allCategoriesError) {
+            console.error("[LISTAR POSTS] Error al consultar todas las categorías:", JSON.stringify(allCategoriesError, null, 2));
+            if (allCategoriesError.code === '42501' || allCategoriesError.message?.includes('policy')) {
+              console.error("[LISTAR POSTS] ERROR: RLS está bloqueando el acceso. Crear una política que permita SELECT en categories");
+            }
+          } else {
+            console.log("[LISTAR POSTS] Primeras 10 categorías en la tabla (sin filtro):", JSON.stringify(allCategories, null, 2));
+            if (!allCategories || allCategories.length === 0) {
+              console.warn("[LISTAR POSTS] La tabla categories está vacía o RLS está bloqueando el acceso");
+            }
+          }
+        }
+      }
+      
+      // Agregar category_name a cada post
+      serialized.forEach((post, index) => {
+        if (post.category_id && categoryMap.has(post.category_id)) {
+          serialized[index].category_name = categoryMap.get(post.category_id);
+        }
+      });
+    }
 
     console.log("[LISTAR POSTS] Cantidad de resultados serializados:", serialized.length);
+    if (serialized.length > 0) {
+      console.log("[LISTAR POSTS] Primer resultado final:", JSON.stringify(serialized[0], null, 2));
+    }
     console.log("[LISTAR POSTS] Respuesta final preparada");
 
     return c.json({

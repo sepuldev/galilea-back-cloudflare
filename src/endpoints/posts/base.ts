@@ -9,6 +9,8 @@ export const post = z.object({
   category_id: z.number().int(),
   created_at: z.string().datetime().optional(),
   updated_at: z.string().datetime().optional(),
+  category_name: z.string().optional(), // Nombre de la categoría desde el JOIN
+  image_url: z.string().optional(), // URL de la imagen del post
 });
 
 export const PostModel = {
@@ -16,8 +18,10 @@ export const PostModel = {
   primaryKeys: ["id"], // Clave primaria de la tabla
   schema: post, // Esquema de la tabla
   serializer: (obj: Record<string, string | number | boolean | null | undefined>) => { // Serializador de la tabla
+    // Excluir campos que no están en el schema (como el objeto categories del JOIN)
+    const { categories, ...rest } = obj;
     return { // Retorna el objeto serializado
-      ...obj,
+      ...rest,
       // No hay conversiones especiales necesarias para posts
     };
   },

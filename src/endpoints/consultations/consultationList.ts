@@ -37,7 +37,7 @@ export class ConsultationList extends OpenAPIRoute {
     console.log("[LISTAR CONSULTAS] Iniciando solicitud GET /consultations");
     const data = await this.getValidatedData<typeof this.schema>();
     console.log("[LISTAR CONSULTAS] Parámetros de consulta recibidos:", JSON.stringify(data.query, null, 2));
-    
+
     const supabase = getSupabaseClient(c.env);
     console.log("[LISTAR CONSULTAS] Cliente de Supabase inicializado");
     console.log("[LISTAR CONSULTAS] Nombre de tabla:", ConsultationModel.tableName);
