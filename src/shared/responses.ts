@@ -72,15 +72,26 @@ export const commonResponses = {
   },
 };
 
-// Helper para crear respuestas completas para operaciones CRUD
-export const createCRUDResponses = <T extends z.ZodTypeAny>(resultSchema: T, options?: {
+/**
+ * Tipo para las opciones de createCRUDResponses
+ */
+interface CRUDResponsesOptions {
   include201?: boolean;
   include200?: boolean;
   custom201Description?: string;
   custom200Description?: string;
   custom404Description?: string;
-  excludeCommonResponses?: string[]; // Array de códigos HTTP a excluir de las respuestas comunes
-}) => {
+  excludeCommonResponses?: string[];
+}
+
+/**
+ * Helper para crear respuestas completas para operaciones CRUD
+ * Retorna un objeto con las respuestas HTTP tipadas correctamente para chanfana
+ */
+export const createCRUDResponses = <T extends z.ZodTypeAny>(
+  resultSchema: T, 
+  options?: CRUDResponsesOptions
+) => {
   const responses: Record<string, any> = {};
 
   if (options?.include201) {

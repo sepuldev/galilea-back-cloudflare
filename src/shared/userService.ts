@@ -1,5 +1,12 @@
-import { SupabaseClient } from "@supabase/supabase-js";
+import { SupabaseClient, PostgrestError } from "@supabase/supabase-js";
 import { UserModel } from "../endpoints/users/base";
+import { z } from "zod";
+
+/**
+ * Tipo para un usuario de la base de datos
+ * Basado en el schema de UserModel
+ */
+export type User = z.infer<typeof UserModel.schema>;
 
 /**
  * Interfaz para los datos necesarios para crear un usuario desde una consulta
@@ -13,6 +20,31 @@ export interface CreateUserFromConsultationData {
 }
 
 /**
+ * Resultado de una operación de búsqueda de usuarios
+ */
+export interface FindUserResult {
+  data: User[] | null;
+  error: PostgrestError | null;
+}
+
+/**
+ * Resultado de una operación de creación de usuario
+ */
+export interface CreateUserResult {
+  data: User | null;
+  error: PostgrestError | null;
+}
+
+/**
+ * Resultado de findOrCreateUser
+ */
+export interface FindOrCreateUserResult {
+  data: User | null;
+  error: PostgrestError | null;
+  created: boolean;
+}
+
+/**
  * Busca un usuario por DNI y email
  * @param supabase Cliente de Supabase
  * @param dni DNI del usuario
@@ -23,7 +55,7 @@ export async function findUserByDniAndEmail(
   supabase: SupabaseClient,
   dni: string,
   email: string
-): Promise<{ data: any[] | null; error: any }> {
+): Promise<FindUserResult> {
   console.log("[USER SERVICE] Buscando usuario con DNI:", dni, "y email:", email);
   
   const { data, error } = await supabase
@@ -50,7 +82,7 @@ export async function findUserByDniAndEmail(
 export async function createUserFromConsultation(
   supabase: SupabaseClient,
   userData: CreateUserFromConsultationData
-): Promise<{ data: any | null; error: any }> {
+): Promise<CreateUserResult> {
   console.log("[USER SERVICE] Creando nuevo usuario desde datos de consulta...");
   
   // Combinar first_name y last_name para el campo name del usuario
@@ -92,7 +124,7 @@ export async function createUserFromConsultation(
 export async function findOrCreateUser(
   supabase: SupabaseClient,
   userData: CreateUserFromConsultationData
-): Promise<{ data: any | null; error: any; created: boolean }> {
+): Promise<FindOrCreateUserResult> {
   // Validar que tenemos los datos necesarios
   if (!userData.dni || !userData.email) {
     console.log("[USER SERVICE] DNI o email no proporcionado, omitiendo búsqueda/creación de usuario");

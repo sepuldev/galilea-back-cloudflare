@@ -2,6 +2,7 @@ import { contentJson, OpenAPIRoute } from "chanfana";
 import { AppContext } from "../../types";
 import { z } from "zod";
 import { commonResponses } from "../../shared/responses";
+import { checkRateLimit } from "../../shared/rateLimit";
 
 // Schema para validar el body del request
 const emailSchema = z.object({
@@ -35,6 +36,13 @@ export class EmailCreate extends OpenAPIRoute {
     };
 
     public async handle(c: AppContext) {
+        // Este es un endpoint público - NO requiere autenticación
+        // La protección se hace mediante rate limiting estricto para prevenir abuso
+        
+        // Rate limiting estricto para email (5 requests por minuto)
+        const rateLimitError = checkRateLimit(c, 5, 60);
+        if (rateLimitError) return rateLimitError;
+
         console.log("[CREAR EMAIL] Iniciando solicitud POST /email");
 
         try {
@@ -147,12 +155,26 @@ export class EmailCreate extends OpenAPIRoute {
                 },
                 200,
             );
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error("[CREAR EMAIL] ERROR al enviar emails:", error);
-            console.error("[CREAR EMAIL] Detalles del error:", JSON.stringify(error, null, 2));
+            
+            // Manejar error de forma type-safe
+            const errorMessage = error instanceof Error 
+                ? error.message 
+                : "Error al enviar los emails";
+            
+            const errorDetails = error instanceof Error 
+                ? error.toString() 
+                : String(error);
+            
+            console.error("[CREAR EMAIL] Detalles del error:", errorDetails);
 
-            if (error.response) {
-                console.error("[CREAR EMAIL] Respuesta de SendGrid:", JSON.stringify(error.response.body, null, 2));
+            // Verificar si es un error de SendGrid con response
+            if (error && typeof error === "object" && "response" in error) {
+                const sendGridError = error as { response?: { body?: unknown } };
+                if (sendGridError.response?.body) {
+                    console.error("[CREAR EMAIL] Respuesta de SendGrid:", JSON.stringify(sendGridError.response.body, null, 2));
+                }
             }
 
             return c.json(
@@ -161,7 +183,7 @@ export class EmailCreate extends OpenAPIRoute {
                     errors: [
                         {
                             code: 500,
-                            message: error.message || "Error al enviar los emails",
+                            message: errorMessage,
                         },
                     ],
                 },

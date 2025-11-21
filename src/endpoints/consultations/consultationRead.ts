@@ -4,6 +4,7 @@ import { ConsultationModel } from "./base";
 import { getSupabaseClient } from "../../supabase";
 import { z } from "zod";
 import { createCRUDResponses } from "../../shared/responses";
+import { checkAuth } from "../../shared/auth";
 
 export class ConsultationRead extends OpenAPIRoute {
   public schema = {
@@ -23,6 +24,10 @@ export class ConsultationRead extends OpenAPIRoute {
   };
 
   public async handle(c: AppContext) {
+    // Verificar autenticación
+    const authError = checkAuth(c);
+    if (authError) return authError;
+
     console.log("[LEER CONSULTA] Iniciando solicitud GET /consultations/:id");
     const data = await this.getValidatedData<typeof this.schema>();
     console.log("[LEER CONSULTA] ID de la consulta solicitada:", data.params.id);

@@ -5,7 +5,7 @@ import { getSupabaseServiceClient } from "../../supabase";
 import { z } from "zod";
 import { createCRUDResponses } from "../../shared/responses";
 import { findOrCreateUser } from "../../shared/userService";
-import { checkAuth } from "../../shared/auth";
+import { checkRateLimit } from "../../shared/rateLimit";
 
 // Schema para aceptar datos del formulario (frontend)
 // Ahora coincide directamente con los nombres de las columnas de la BD
@@ -40,23 +40,50 @@ export class ConsultationCreate extends OpenAPIRoute {
   };
 
   public async handle(c: AppContext) {
-    // Verificar autenticación
-    const authError = checkAuth(c);
-    if (authError) return authError;
+    // Este es un endpoint público - NO requiere autenticación
+    // La protección se hace mediante rate limiting para prevenir abuso
+    
+    // Rate limiting
+    const rateLimitError = checkRateLimit(c);
+    if (rateLimitError) return rateLimitError;
 
     console.log("[CREAR CONSULTA] Iniciando solicitud POST /consultations");
     const validatedData = await this.getValidatedData<typeof this.schema>();
+    
+    // Validar que body existe
+    if (!validatedData.body) {
+      return c.json(
+        {
+          success: false,
+          errors: [{ code: 400, message: "Body es requerido" }],
+        },
+        400,
+      );
+    }
+    
     console.log("[CREAR CONSULTA] Datos recibidos en el body:", JSON.stringify(validatedData.body, null, 2));
     
     // Extraer los datos del wrapper "data" si existe, o usar directamente
-    const formData = "data" in validatedData.body 
-      ? validatedData.body.data 
-      : validatedData.body;
+    // Type guard para verificar si tiene la propiedad "data"
+    const formData = (validatedData.body && typeof validatedData.body === "object" && "data" in validatedData.body)
+      ? (validatedData.body as { data: z.infer<typeof consultationRequestSchema> }).data
+      : validatedData.body as z.infer<typeof consultationRequestSchema>;
     
     console.log("[CREAR CONSULTA] Datos extraídos del formulario:", JSON.stringify(formData, null, 2));
     
     // Los datos ya coinciden con los nombres de las columnas, solo necesitamos limpiar campos opcionales
-    const consultationData: Record<string, any> = {
+    // Tipo específico para los datos de consulta que se insertarán en Supabase
+    type ConsultationInsertData = {
+      first_name: string;
+      email: string;
+      phone_number: string;
+      consultation_reason: string;
+      last_name?: string;
+      dni_or_id?: string;
+      nationality?: string;
+    };
+    
+    const consultationData: ConsultationInsertData = {
       first_name: formData.first_name,
       email: formData.email,
       phone_number: formData.phone_number,

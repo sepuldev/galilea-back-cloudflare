@@ -5,6 +5,7 @@ import { PostModel } from "./base";
 import { getSupabaseClient } from "../../supabase";
 import { createCRUDResponses } from "../../shared/responses";
 import { checkAuth } from "../../shared/auth";
+import { checkRateLimit } from "../../shared/rateLimit";
 
 export class PostCreate extends OpenAPIRoute {
   public schema = {
@@ -32,6 +33,10 @@ export class PostCreate extends OpenAPIRoute {
     // Verificar autenticación
     const authError = checkAuth(c);
     if (authError) return authError;
+
+    // Rate limiting
+    const rateLimitError = checkRateLimit(c);
+    if (rateLimitError) return rateLimitError;
 
     console.log("[CREAR POST] Iniciando solicitud POST /posts");
     const data = await this.getValidatedData<typeof this.schema>();

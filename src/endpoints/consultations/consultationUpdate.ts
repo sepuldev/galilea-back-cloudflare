@@ -51,7 +51,19 @@ export class ConsultationUpdate extends OpenAPIRoute {
     console.log("[ACTUALIZAR CONSULTA] Nombre de tabla:", ConsultationModel.tableName);
 
     // Preparar datos de actualización
-    const updateData: Record<string, any> = {};
+    // Tipo específico para los campos que se pueden actualizar
+    type ConsultationUpdateData = {
+      dni_or_id?: string;
+      email?: string;
+      consultation_reason?: string;
+      first_name?: string;
+      phone_number?: string;
+      status?: string;
+      last_name?: string;
+      nationality?: string;
+    };
+    
+    const updateData: ConsultationUpdateData = {};
     if (data.body.dni_or_id !== undefined) updateData.dni_or_id = data.body.dni_or_id;
     if (data.body.email !== undefined) updateData.email = data.body.email;
     if (data.body.consultation_reason !== undefined) updateData.consultation_reason = data.body.consultation_reason;

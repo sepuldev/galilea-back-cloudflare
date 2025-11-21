@@ -46,7 +46,15 @@ export class PostUpdate extends OpenAPIRoute {
     console.log("[ACTUALIZAR POST] Nombre de tabla:", PostModel.tableName);
 
     // Preparar datos de actualización
-    const updateData: Record<string, any> = {};
+    // Tipo específico para los campos que se pueden actualizar
+    type PostUpdateData = {
+      title?: string;
+      content?: string;
+      author_id?: string;
+      category_id?: number;
+    };
+    
+    const updateData: PostUpdateData = {};
     if (data.body.title !== undefined) updateData.title = data.body.title;
     if (data.body.content !== undefined) updateData.content = data.body.content;
     if (data.body.author_id !== undefined) updateData.author_id = data.body.author_id;

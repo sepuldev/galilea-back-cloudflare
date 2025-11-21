@@ -6,26 +6,52 @@ import { emailRouter } from "./endpoints/email/router";
 import { consultationsRouter } from "./endpoints/consultations/router";
 import { ContentfulStatusCode } from "hono/utils/http-status";
 import { DummyEndpoint } from "./endpoints/dummyEndpoint";
+import { getCorsConfig } from "./shared/corsConfig";
 
 // Start a Hono app
 const app = new Hono<{ Bindings: Env }>();
 
-// Configurar CORS - Permitir peticiones desde localhost:3000 y otros orígenes
+/**
+ * Configuración de CORS (Cross-Origin Resource Sharing)
+ * 
+ * CONFIGURACIÓN MEDIANTE VARIABLES DE ENTORNO:
+ * 
+ * 1. CORS_ORIGINS: Lista de orígenes permitidos separados por comas
+ *    Ejemplo: "https://mi-dominio.com,https://www.mi-dominio.com,http://localhost:3000"
+ * 
+ * 2. CORS_CREDENTIALS: "true" o "false" para permitir credenciales (default: "true")
+ * 
+ * 3. CORS_MAX_AGE: Tiempo de cache del preflight en segundos (default: 600)
+ * 
+ * Si CORS_ORIGINS no está configurado, usa valores por defecto para desarrollo local
+ * 
+ * La configuración se obtiene dinámicamente desde variables de entorno en cada request
+ */
 app.use(
   "*",
-  cors({
-    origin: [
-      "http://localhost:3000",
-      "http://127.0.0.1:3000",
-      "http://localhost:3001",
-      "http://127.0.0.1:3001",
-    ],
-    allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowHeaders: ["Content-Type", "Authorization"],
-    exposeHeaders: ["Content-Length"],
-    maxAge: 600,
-    credentials: true,
-  }),
+  async (c, next) => {
+    // Obtener configuración de CORS desde variables de entorno
+    const corsConfig = getCorsConfig(c.env);
+    
+    // Aplicar middleware de CORS con la configuración obtenida
+    const corsMiddleware = cors({
+      origin: (origin: string) => {
+        // Si no hay origen (petición same-origin), permitir
+        if (!origin) {
+          return corsConfig.origin[0] || "*";
+        }
+        // Verificar si el origen está en la lista de permitidos
+        return corsConfig.origin.includes(origin) ? origin : null;
+      },
+      allowMethods: [...corsConfig.allowMethods] as string[],
+      allowHeaders: corsConfig.allowHeaders,
+      exposeHeaders: corsConfig.exposeHeaders,
+      maxAge: corsConfig.maxAge,
+      credentials: corsConfig.credentials,
+    });
+    
+    return corsMiddleware(c, next);
+  },
 );
 
 app.onError((err, c) => {
