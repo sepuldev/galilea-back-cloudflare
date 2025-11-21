@@ -42,6 +42,8 @@ export function getCorsConfig(env: Env) {
     ];
     
     console.warn("[CORS] CORS_ORIGINS no configurado - Usando orígenes por defecto (solo localhost)");
+    console.warn("[CORS] Para producción, configura CORS_ORIGINS con los dominios permitidos");
+    console.warn("[CORS] Ejemplo: https://galilea.vercel.app,https://*.vercel.app");
   }
   
   // Obtener configuración de credenciales (default: true)
@@ -56,9 +58,9 @@ export function getCorsConfig(env: Env) {
   
   return {
     origin: allowedOrigins,
-    allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowHeaders: ["Content-Type", "Authorization"],
-    exposeHeaders: ["Content-Length"],
+    allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+    allowHeaders: ["Content-Type", "Authorization", "Accept", "Origin", "X-Requested-With"],
+    exposeHeaders: ["Content-Length", "Content-Type"],
     maxAge: maxAge,
     credentials: allowCredentials,
   };

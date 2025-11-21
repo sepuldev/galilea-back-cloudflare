@@ -41,7 +41,26 @@ app.use(
           return corsConfig.origin[0] || "*";
         }
         // Verificar si el origen está en la lista de permitidos
-        return corsConfig.origin.includes(origin) ? origin : null;
+        // También verificar si coincide con patrones de Vercel (*.vercel.app)
+        const isAllowed = corsConfig.origin.some(allowedOrigin => {
+          if (allowedOrigin === origin) return true;
+          // Soporte para wildcards en Vercel (ej: *.vercel.app)
+          if (allowedOrigin.includes('*')) {
+            const pattern = allowedOrigin.replace(/\*/g, '.*');
+            const regex = new RegExp(`^${pattern}$`);
+            return regex.test(origin);
+          }
+          return false;
+        });
+        
+        if (isAllowed) {
+          console.log(`[CORS] Origen permitido: ${origin}`);
+          return origin;
+        } else {
+          console.warn(`[CORS] Origen bloqueado: ${origin}`);
+          console.warn(`[CORS] Orígenes permitidos: ${corsConfig.origin.join(', ')}`);
+          return null;
+        }
       },
       allowMethods: [...corsConfig.allowMethods] as string[],
       allowHeaders: corsConfig.allowHeaders,
