@@ -3,6 +3,8 @@ import { AppContext } from "../../types";
 import { ConsultationModel } from "./base";
 import { getSupabaseServiceClient } from "../../supabase";
 import { z } from "zod";
+import { createCRUDResponses } from "../../shared/responses";
+import { findOrCreateUser } from "../../shared/userService";
 
 // Schema para aceptar datos del formulario (frontend)
 // Ahora coincide directamente con los nombres de las columnas de la BD
@@ -30,27 +32,10 @@ export class ConsultationCreate extends OpenAPIRoute {
     request: {
       body: contentJson(consultationRequestBodySchema),
     },
-    responses: {
-      "201": {
-        description: "Consulta creada exitosamente",
-        ...contentJson({
-          success: Boolean,
-          result: ConsultationModel.schema,
-        }),
-      },
-      "400": {
-        description: "Bad request",
-        ...contentJson({
-          success: Boolean,
-          errors: z.array(
-            z.object({
-              code: z.number(),
-              message: z.string(),
-            }),
-          ),
-        }),
-      },
-    },
+    responses: createCRUDResponses(ConsultationModel.schema, {
+      include201: true,
+      custom201Description: "Consulta creada exitosamente",
+    }),
   };
 
   public async handle(c: AppContext) {
@@ -91,8 +76,43 @@ export class ConsultationCreate extends OpenAPIRoute {
     // Usar Service Role Key para operaciones de escritura (bypass RLS)
     const supabase = getSupabaseServiceClient(c.env);
     console.log("[CREAR CONSULTA] Cliente de Supabase inicializado (SERVICE_ROLE_KEY)");
-    console.log("[CREAR CONSULTA] Nombre de tabla:", ConsultationModel.tableName);
+    
+    // ===== FLUJO: Buscar/Crear Usuario usando el servicio =====
+    if (formData.dni_or_id && formData.dni_or_id.trim() !== '' && formData.email) {
+      const { data: user, error: userError, created } = await findOrCreateUser(supabase, {
+        dni: formData.dni_or_id,
+        email: formData.email,
+        first_name: formData.first_name,
+        last_name: formData.last_name,
+        phone_number: formData.phone_number,
+      });
 
+      if (userError) {
+        console.error("[CREAR CONSULTA] ERROR en servicio de usuarios:", userError.message);
+        const statusCode = created ? 400 : 500;
+        return c.json(
+          {
+            success: false,
+            errors: [{ 
+              code: statusCode, 
+              message: `Error ${created ? 'al crear' : 'al buscar'} usuario: ${userError.message}` 
+            }],
+          },
+          statusCode,
+        );
+      }
+
+      if (created) {
+        console.log("[CREAR CONSULTA] Usuario creado exitosamente con DNI:", user?.dni);
+      } else if (user) {
+        console.log("[CREAR CONSULTA] Usuario ya existe con DNI:", user.dni);
+      }
+    } else {
+      console.log("[CREAR CONSULTA] No se proporcionó DNI o email, omitiendo búsqueda/creación de usuario");
+    }
+    // ===== FIN FLUJO: Buscar/Crear Usuario =====
+    
+    console.log("[CREAR CONSULTA] Nombre de tabla:", ConsultationModel.tableName);
     console.log("[CREAR CONSULTA] Insertando datos en Supabase...");
     const { data: result, error } = await supabase
       .from(ConsultationModel.tableName)

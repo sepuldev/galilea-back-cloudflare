@@ -1,3 +1,4 @@
+// src/endpoints/posts/base.ts
 import { z } from "zod";
 
 export const post = z.object({
@@ -11,11 +12,11 @@ export const post = z.object({
 });
 
 export const PostModel = {
-  tableName: "posts",
-  primaryKeys: ["id"],
-  schema: post,
-  serializer: (obj: Record<string, string | number | boolean | null | undefined>) => {
-    return {
+  tableName: "posts", // Nombre de la tabla en la base de datos
+  primaryKeys: ["id"], // Clave primaria de la tabla
+  schema: post, // Esquema de la tabla
+  serializer: (obj: Record<string, string | number | boolean | null | undefined>) => { // Serializador de la tabla
+    return { // Retorna el objeto serializado
       ...obj,
       // No hay conversiones especiales necesarias para posts
     };

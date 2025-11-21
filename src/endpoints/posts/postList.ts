@@ -3,6 +3,7 @@ import { AppContext } from "../../types";
 import { PostModel } from "./base";
 import { getSupabaseClient } from "../../supabase";
 import { z } from "zod";
+import { createCRUDResponses } from "../../shared/responses";
 
 export class PostList extends OpenAPIRoute {
   public schema = {
@@ -19,15 +20,10 @@ export class PostList extends OpenAPIRoute {
         orderBy: z.string().optional(),
       }),
     },
-    responses: {
-      "200": {
-        description: "Posts retrieved successfully",
-        ...contentJson({
-          success: Boolean,
-          result: z.array(PostModel.schema),
-        }),
-      },
-    },
+    responses: createCRUDResponses(z.array(PostModel.schema), {
+      include200: true,
+      custom200Description: "Posts retrieved successfully",
+    }),
   };
 
   public async handle(c: AppContext) {

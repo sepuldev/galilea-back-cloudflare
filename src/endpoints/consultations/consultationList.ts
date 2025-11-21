@@ -3,6 +3,7 @@ import { AppContext } from "../../types";
 import { ConsultationModel } from "./base";
 import { getSupabaseClient } from "../../supabase";
 import { z } from "zod";
+import { createCRUDResponses } from "../../shared/responses";
 
 export class ConsultationList extends OpenAPIRoute {
   public schema = {
@@ -20,15 +21,11 @@ export class ConsultationList extends OpenAPIRoute {
         orderBy: z.string().optional(),
       }),
     },
-    responses: {
-      "200": {
-        description: "Consultas obtenidas exitosamente",
-        ...contentJson({
-          success: Boolean,
-          result: z.array(ConsultationModel.schema),
-        }),
-      },
-    },
+    responses: createCRUDResponses(z.array(ConsultationModel.schema), {
+      include200: true,
+      custom200Description: "Consultas obtenidas exitosamente",
+      excludeCommonResponses: ["404"], // List no necesita 404
+    }),
   };
 
   public async handle(c: AppContext) {

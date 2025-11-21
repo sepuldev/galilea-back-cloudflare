@@ -1,3 +1,4 @@
+// src/endpoints/posts/router.ts
 import { Hono } from "hono";
 import { fromHono } from "chanfana";
 import { PostList } from "./postList";

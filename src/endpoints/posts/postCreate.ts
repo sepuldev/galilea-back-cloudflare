@@ -1,8 +1,9 @@
+// src/endpoints/posts/postCreate.ts
 import { contentJson, OpenAPIRoute } from "chanfana";
 import { AppContext } from "../../types";
 import { PostModel } from "./base";
 import { getSupabaseClient } from "../../supabase";
-import { z } from "zod";
+import { createCRUDResponses } from "../../shared/responses";
 
 export class PostCreate extends OpenAPIRoute {
   public schema = {
@@ -19,27 +20,11 @@ export class PostCreate extends OpenAPIRoute {
         }),
       ),
     },
-    responses: {
-      "201": {
-        description: "Post created successfully",
-        ...contentJson({
-          success: Boolean,
-          result: PostModel.schema,
-        }),
-      },
-      "400": {
-        description: "Bad request",
-        ...contentJson({
-          success: Boolean,
-          errors: z.array(
-            z.object({
-              code: z.number(),
-              message: z.string(),
-            }),
-          ),
-        }),
-      },
-    },
+    responses: createCRUDResponses(PostModel.schema, {
+      include201: true,
+      custom201Description: "Post created successfully",
+      custom404Description: "Not Found - Related resource (category_id or author_id) not found",
+    }),
   };
 
   public async handle(c: AppContext) {

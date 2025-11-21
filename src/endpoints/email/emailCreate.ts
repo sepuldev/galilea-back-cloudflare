@@ -1,6 +1,7 @@
 import { contentJson, OpenAPIRoute } from "chanfana";
 import { AppContext } from "../../types";
 import { z } from "zod";
+import { commonResponses } from "../../shared/responses";
 
 // Schema para validar el body del request
 const emailSchema = z.object({
@@ -29,30 +30,7 @@ export class EmailCreate extends OpenAPIRoute {
                     message: z.string(),
                 }),
             },
-            "400": {
-                description: "Bad request",
-                ...contentJson({
-                    success: Boolean,
-                    errors: z.array(
-                        z.object({
-                            code: z.number(),
-                            message: z.string(),
-                        }),
-                    ),
-                }),
-            },
-            "500": {
-                description: "Internal server error",
-                ...contentJson({
-                    success: Boolean,
-                    errors: z.array(
-                        z.object({
-                            code: z.number(),
-                            message: z.string(),
-                        }),
-                    ),
-                }),
-            },
+            ...commonResponses,
         },
     };
 

@@ -3,6 +3,7 @@ import { AppContext } from "../../types";
 import { ConsultationModel } from "./base";
 import { getSupabaseServiceClient } from "../../supabase";
 import { z } from "zod";
+import { createCRUDResponses } from "../../shared/responses";
 
 export class ConsultationDelete extends OpenAPIRoute {
   public schema = {
@@ -14,27 +15,11 @@ export class ConsultationDelete extends OpenAPIRoute {
         id: z.string().uuid(),
       }),
     },
-    responses: {
-      "200": {
-        description: "Consulta eliminada exitosamente",
-        ...contentJson({
-          success: Boolean,
-          result: z.object({ id: z.string().uuid() }),
-        }),
-      },
-      "404": {
-        description: "Consulta no encontrada",
-        ...contentJson({
-          success: Boolean,
-          errors: z.array(
-            z.object({
-              code: z.number(),
-              message: z.string(),
-            }),
-          ),
-        }),
-      },
-    },
+    responses: createCRUDResponses(z.object({ id: z.string().uuid() }), {
+      include200: true,
+      custom200Description: "Consulta eliminada exitosamente",
+      custom404Description: "Consulta no encontrada",
+    }),
   };
 
   public async handle(c: AppContext) {

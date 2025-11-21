@@ -3,6 +3,7 @@ import { AppContext } from "../../types";
 import { PostModel } from "./base";
 import { getSupabaseClient } from "../../supabase";
 import { z } from "zod";
+import { createCRUDResponses } from "../../shared/responses";
 
 export class PostUpdate extends OpenAPIRoute {
   public schema = {
@@ -22,27 +23,11 @@ export class PostUpdate extends OpenAPIRoute {
         }).partial(),
       ),
     },
-    responses: {
-      "200": {
-        description: "Post updated successfully",
-        ...contentJson({
-          success: Boolean,
-          result: PostModel.schema,
-        }),
-      },
-      "404": {
-        description: "Post not found",
-        ...contentJson({
-          success: Boolean,
-          errors: z.array(
-            z.object({
-              code: z.number(),
-              message: z.string(),
-            }),
-          ),
-        }),
-      },
-    },
+    responses: createCRUDResponses(PostModel.schema, {
+      include200: true,
+      custom200Description: "Post updated successfully",
+      custom404Description: "Post not found",
+    }),
   };
 
   public async handle(c: AppContext) {

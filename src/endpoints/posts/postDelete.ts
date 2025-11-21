@@ -3,6 +3,7 @@ import { AppContext } from "../../types";
 import { PostModel } from "./base";
 import { getSupabaseClient } from "../../supabase";
 import { z } from "zod";
+import { createCRUDResponses } from "../../shared/responses";
 
 export class PostDelete extends OpenAPIRoute {
   public schema = {
@@ -14,27 +15,11 @@ export class PostDelete extends OpenAPIRoute {
         id: z.string().uuid(),
       }),
     },
-    responses: {
-      "200": {
-        description: "Post deleted successfully",
-        ...contentJson({
-          success: Boolean,
-          result: z.object({ id: z.string().uuid() }),
-        }),
-      },
-      "404": {
-        description: "Post not found",
-        ...contentJson({
-          success: Boolean,
-          errors: z.array(
-            z.object({
-              code: z.number(),
-              message: z.string(),
-            }),
-          ),
-        }),
-      },
-    },
+    responses: createCRUDResponses(z.object({ id: z.string().uuid() }), {
+      include200: true,
+      custom200Description: "Post deleted successfully",
+      custom404Description: "Post not found",
+    }),
   };
 
   public async handle(c: AppContext) {

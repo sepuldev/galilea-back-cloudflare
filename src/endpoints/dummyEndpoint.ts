@@ -1,6 +1,7 @@
 import { contentJson, OpenAPIRoute } from "chanfana";
 import { AppContext } from "../types";
 import { z } from "zod";
+import { createCRUDResponses } from "../shared/responses";
 
 export class DummyEndpoint extends OpenAPIRoute {
   public schema = {
@@ -17,19 +18,17 @@ export class DummyEndpoint extends OpenAPIRoute {
         }),
       ),
     },
-    responses: {
-      "200": {
-        description: "Returns the log details",
-        ...contentJson({
-          success: Boolean,
-          result: z.object({
-            msg: z.string(),
-            slug: z.string(),
-            name: z.string(),
-          }),
-        }),
-      },
-    },
+    responses: createCRUDResponses(
+      z.object({
+        msg: z.string(),
+        slug: z.string(),
+        name: z.string(),
+      }),
+      {
+        include200: true,
+        custom200Description: "Returns the log details",
+      }
+    ),
   };
 
   public async handle(c: AppContext) {
