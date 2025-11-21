@@ -4,6 +4,7 @@ import { AppContext } from "../../types";
 import { PostModel } from "./base";
 import { getSupabaseClient } from "../../supabase";
 import { createCRUDResponses } from "../../shared/responses";
+import { checkAuth } from "../../shared/auth";
 
 export class PostCreate extends OpenAPIRoute {
   public schema = {
@@ -28,6 +29,10 @@ export class PostCreate extends OpenAPIRoute {
   };
 
   public async handle(c: AppContext) {
+    // Verificar autenticación
+    const authError = checkAuth(c);
+    if (authError) return authError;
+
     console.log("[CREAR POST] Iniciando solicitud POST /posts");
     const data = await this.getValidatedData<typeof this.schema>();
     console.log("[CREAR POST] Datos recibidos en el body:", JSON.stringify(data.body, null, 2));

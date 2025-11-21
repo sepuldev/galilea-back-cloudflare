@@ -4,6 +4,7 @@ import { ConsultationModel } from "./base";
 import { getSupabaseServiceClient } from "../../supabase";
 import { z } from "zod";
 import { createCRUDResponses } from "../../shared/responses";
+import { checkAuth } from "../../shared/auth";
 
 export class ConsultationDelete extends OpenAPIRoute {
   public schema = {
@@ -23,6 +24,10 @@ export class ConsultationDelete extends OpenAPIRoute {
   };
 
   public async handle(c: AppContext) {
+    // Verificar autenticación
+    const authError = checkAuth(c);
+    if (authError) return authError;
+
     console.log("[ELIMINAR CONSULTA] Iniciando solicitud DELETE /consultations/:id");
     const data = await this.getValidatedData<typeof this.schema>();
     console.log("[ELIMINAR CONSULTA] ID de la consulta a eliminar:", data.params.id);

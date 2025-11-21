@@ -5,6 +5,7 @@ import { getSupabaseServiceClient } from "../../supabase";
 import { z } from "zod";
 import { createCRUDResponses } from "../../shared/responses";
 import { findOrCreateUser } from "../../shared/userService";
+import { checkAuth } from "../../shared/auth";
 
 // Schema para aceptar datos del formulario (frontend)
 // Ahora coincide directamente con los nombres de las columnas de la BD
@@ -39,6 +40,10 @@ export class ConsultationCreate extends OpenAPIRoute {
   };
 
   public async handle(c: AppContext) {
+    // Verificar autenticación
+    const authError = checkAuth(c);
+    if (authError) return authError;
+
     console.log("[CREAR CONSULTA] Iniciando solicitud POST /consultations");
     const validatedData = await this.getValidatedData<typeof this.schema>();
     console.log("[CREAR CONSULTA] Datos recibidos en el body:", JSON.stringify(validatedData.body, null, 2));

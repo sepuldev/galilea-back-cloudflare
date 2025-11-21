@@ -4,6 +4,7 @@ import { PostModel } from "./base";
 import { getSupabaseClient } from "../../supabase";
 import { z } from "zod";
 import { createCRUDResponses } from "../../shared/responses";
+import { checkAuth } from "../../shared/auth";
 
 export class PostUpdate extends OpenAPIRoute {
   public schema = {
@@ -31,6 +32,10 @@ export class PostUpdate extends OpenAPIRoute {
   };
 
   public async handle(c: AppContext) {
+    // Verificar autenticación
+    const authError = checkAuth(c);
+    if (authError) return authError;
+
     console.log("[ACTUALIZAR POST] Iniciando solicitud PUT /posts/:id");
     const data = await this.getValidatedData<typeof this.schema>();
     console.log("[ACTUALIZAR POST] ID del post a actualizar:", data.params.id);

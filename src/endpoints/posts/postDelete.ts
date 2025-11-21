@@ -4,6 +4,7 @@ import { PostModel } from "./base";
 import { getSupabaseClient } from "../../supabase";
 import { z } from "zod";
 import { createCRUDResponses } from "../../shared/responses";
+import { checkAuth } from "../../shared/auth";
 
 export class PostDelete extends OpenAPIRoute {
   public schema = {
@@ -23,6 +24,10 @@ export class PostDelete extends OpenAPIRoute {
   };
 
   public async handle(c: AppContext) {
+    // Verificar autenticación
+    const authError = checkAuth(c);
+    if (authError) return authError;
+
     console.log("[ELIMINAR POST] Iniciando solicitud DELETE /posts/:id");
     const data = await this.getValidatedData<typeof this.schema>();
     console.log("[ELIMINAR POST] ID del post a eliminar:", data.params.id);
