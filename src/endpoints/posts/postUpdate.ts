@@ -1,5 +1,5 @@
 import { contentJson, OpenAPIRoute } from "chanfana";
-import { AppContext } from "../../types";
+import { AppContext, PostUpdateData } from "../../types";
 import { PostModel } from "./base";
 import { getSupabaseClient } from "../../supabase";
 import { z } from "zod";
@@ -46,14 +46,6 @@ export class PostUpdate extends OpenAPIRoute {
     console.log("[ACTUALIZAR POST] Nombre de tabla:", PostModel.tableName);
 
     // Preparar datos de actualización
-    // Tipo específico para los campos que se pueden actualizar
-    type PostUpdateData = {
-      title?: string;
-      content?: string;
-      author_id?: string;
-      category_id?: number;
-    };
-    
     const updateData: PostUpdateData = {};
     if (data.body.title !== undefined) updateData.title = data.body.title;
     if (data.body.content !== undefined) updateData.content = data.body.content;

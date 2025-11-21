@@ -72,17 +72,7 @@ export const commonResponses = {
   },
 };
 
-/**
- * Tipo para las opciones de createCRUDResponses
- */
-interface CRUDResponsesOptions {
-  include201?: boolean;
-  include200?: boolean;
-  custom201Description?: string;
-  custom200Description?: string;
-  custom404Description?: string;
-  excludeCommonResponses?: string[];
-}
+import type { CRUDResponsesOptions } from "../types";
 
 /**
  * Helper para crear respuestas completas para operaciones CRUD

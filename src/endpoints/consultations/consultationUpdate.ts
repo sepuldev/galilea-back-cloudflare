@@ -1,5 +1,5 @@
 import { contentJson, OpenAPIRoute } from "chanfana";
-import { AppContext } from "../../types";
+import { AppContext, ConsultationUpdateData } from "../../types";
 import { ConsultationModel } from "./base";
 import { getSupabaseServiceClient } from "../../supabase";
 import { z } from "zod";
@@ -51,18 +51,6 @@ export class ConsultationUpdate extends OpenAPIRoute {
     console.log("[ACTUALIZAR CONSULTA] Nombre de tabla:", ConsultationModel.tableName);
 
     // Preparar datos de actualización
-    // Tipo específico para los campos que se pueden actualizar
-    type ConsultationUpdateData = {
-      dni_or_id?: string;
-      email?: string;
-      consultation_reason?: string;
-      first_name?: string;
-      phone_number?: string;
-      status?: string;
-      last_name?: string;
-      nationality?: string;
-    };
-    
     const updateData: ConsultationUpdateData = {};
     if (data.body.dni_or_id !== undefined) updateData.dni_or_id = data.body.dni_or_id;
     if (data.body.email !== undefined) updateData.email = data.body.email;

@@ -1,48 +1,11 @@
-import { SupabaseClient, PostgrestError } from "@supabase/supabase-js";
+import { SupabaseClient } from "@supabase/supabase-js";
 import { UserModel } from "../endpoints/users/base";
-import { z } from "zod";
-
-/**
- * Tipo para un usuario de la base de datos
- * Basado en el schema de UserModel
- */
-export type User = z.infer<typeof UserModel.schema>;
-
-/**
- * Interfaz para los datos necesarios para crear un usuario desde una consulta
- */
-export interface CreateUserFromConsultationData {
-  dni: string;
-  email: string;
-  first_name: string;
-  last_name?: string;
-  phone_number: string;
-}
-
-/**
- * Resultado de una operación de búsqueda de usuarios
- */
-export interface FindUserResult {
-  data: User[] | null;
-  error: PostgrestError | null;
-}
-
-/**
- * Resultado de una operación de creación de usuario
- */
-export interface CreateUserResult {
-  data: User | null;
-  error: PostgrestError | null;
-}
-
-/**
- * Resultado de findOrCreateUser
- */
-export interface FindOrCreateUserResult {
-  data: User | null;
-  error: PostgrestError | null;
-  created: boolean;
-}
+import type {
+  CreateUserFromConsultationData,
+  FindUserResult,
+  CreateUserResult,
+  FindOrCreateUserResult,
+} from "../types";
 
 /**
  * Busca un usuario por DNI y email

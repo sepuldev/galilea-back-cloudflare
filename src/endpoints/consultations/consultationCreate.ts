@@ -1,5 +1,5 @@
 import { contentJson, OpenAPIRoute } from "chanfana";
-import { AppContext } from "../../types";
+import { AppContext, ConsultationInsertData } from "../../types";
 import { ConsultationModel } from "./base";
 import { getSupabaseServiceClient } from "../../supabase";
 import { z } from "zod";
@@ -72,17 +72,6 @@ export class ConsultationCreate extends OpenAPIRoute {
     console.log("[CREAR CONSULTA] Datos extraídos del formulario:", JSON.stringify(formData, null, 2));
     
     // Los datos ya coinciden con los nombres de las columnas, solo necesitamos limpiar campos opcionales
-    // Tipo específico para los datos de consulta que se insertarán en Supabase
-    type ConsultationInsertData = {
-      first_name: string;
-      email: string;
-      phone_number: string;
-      consultation_reason: string;
-      last_name?: string;
-      dni_or_id?: string;
-      nationality?: string;
-    };
-    
     const consultationData: ConsultationInsertData = {
       first_name: formData.first_name,
       email: formData.email,

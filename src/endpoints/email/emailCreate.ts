@@ -1,5 +1,5 @@
 import { contentJson, OpenAPIRoute } from "chanfana";
-import { AppContext } from "../../types";
+import { AppContext, SendGridError } from "../../types";
 import { z } from "zod";
 import { commonResponses } from "../../shared/responses";
 import { checkRateLimit } from "../../shared/rateLimit";
@@ -171,7 +171,7 @@ export class EmailCreate extends OpenAPIRoute {
 
             // Verificar si es un error de SendGrid con response
             if (error && typeof error === "object" && "response" in error) {
-                const sendGridError = error as { response?: { body?: unknown } };
+                const sendGridError = error as SendGridError;
                 if (sendGridError.response?.body) {
                     console.error("[CREAR EMAIL] Respuesta de SendGrid:", JSON.stringify(sendGridError.response.body, null, 2));
                 }
