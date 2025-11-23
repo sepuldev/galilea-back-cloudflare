@@ -20,6 +20,6 @@
     "SUPABASE_SERVICE_ROLE_KEY":"sb_secret_4Yu9pwEeJL1i4ARdcGIOkg_apBN9bb5",
     "SMTP_FROM":"ssepulveda.dev@gmail.com",
     "SMTP_REPLY_TO":"ssepulveda.dev@gmail.com",
-    "CORS_ORIGINS" : "https://galilea-git-main-sergios-projects-4ee97cc2.vercel.app"
+    "CORS_ORIGINS" : "https://galilea.vercel.app,https://galilea-git-main-sergios-projects-4ee97cc2.vercel.app,*,https://*.vercel.app"
   }
 }
