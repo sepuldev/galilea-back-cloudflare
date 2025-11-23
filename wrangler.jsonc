@@ -15,11 +15,11 @@
   // - SENDGRID_API_KEY, SMTP_FROM, OWNER_EMAIL (SendGrid)
   // - SMTP_REPLY_TO (opcional, SendGrid)
   "vars": {
-    "SUPABASE_URL": "SUPABASE_URL",
-    "SUPABASE_ANON_KEY": "SUPABASE_ANON_KEY",
-    "SUPABASE_SERVICE_ROLE_KEY":"SUPABASE_SERVICE_ROLE_KEY",
-    "SMTP_FROM":"SMTP_FROM",
-    "SMTP_REPLY_TO":"SMTP_REPLY_TO",
+    "SUPABASE_URL": "https://xwyameylqjbxglnsmfqu.supabase.co",
+    "SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh3eWFtZXlscWpieGdsbnNtZnF1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM0OTg1NzcsImV4cCI6MjA3OTA3NDU3N30.iS0UJh4Deqyfr9bghfu7CxA1ua3KJmLSgKc-O1ncn-A",
+    "SUPABASE_SERVICE_ROLE_KEY":"sb_secret_4Yu9pwEeJL1i4ARdcGIOkg_apBN9bb5",
+    "SMTP_FROM":"ssepulveda.dev@gmail.com",
+    "SMTP_REPLY_TO":"ssepulveda.dev@gmail.com",
     "CORS_ORIGINS" : "https://galilea-git-main-sergios-projects-4ee97cc2.vercel.app"
   }
 }
