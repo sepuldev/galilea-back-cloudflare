@@ -80,18 +80,27 @@ export class UploadImage extends OpenAPIRoute {
         // Upload to 'galilea-posts' bucket in 'posts' folder
         // El bucket se llama 'galilea-posts' y las imágenes van en la carpeta 'posts'
         const uploadPath = `posts/${fileName}`;
+        const bucketName = 'galilea-posts';
+
+        console.log(`[UPLOAD] Attempting to upload to bucket: ${bucketName}, path: ${uploadPath}`);
+        console.log(`[UPLOAD] File info: name=${file.name}, size=${file.size}, type=${file.type}`);
+
         const { data, error } = await supabase
             .storage
-            .from('galilea-posts')
+            .from(bucketName)
             .upload(uploadPath, file, {
                 contentType: file.type,
                 upsert: false
             });
 
         if (error) {
-            console.error("Upload error:", error);
+            console.error("[UPLOAD] Upload error:", error);
+            console.error("[UPLOAD] Error details:", JSON.stringify(error, null, 2));
+            console.error("[UPLOAD] Bucket name used:", bucketName);
             return c.json({ success: false, errors: [{ code: 500, message: error.message }] }, 500);
         }
+
+        console.log("[UPLOAD] Upload successful. Data:", data);
 
         // Usar la ruta devuelta por Supabase (data.path) o la ruta que usamos para subir
         const filePath = data?.path || uploadPath;
