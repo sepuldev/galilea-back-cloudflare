@@ -1,0 +1,2870 @@
+{
+	"openapi": "3.1.0",
+	"info": {
+		"title": "My Awesome API",
+		"version": "2.0.0",
+		"description": "This is the documentation for my awesome API."
+	},
+	"components": { "schemas": {}, "parameters": {} },
+	"paths": {
+		"/posts": {
+			"get": {
+				"tags": ["Posts"],
+				"summary": "List all posts with optional filtering and pagination",
+				"operationId": "list-posts",
+				"parameters": [
+					{
+						"schema": { "type": "string" },
+						"required": false,
+						"name": "search",
+						"in": "query"
+					},
+					{
+						"schema": { "type": "string", "format": "uuid" },
+						"required": false,
+						"name": "author_id",
+						"in": "query"
+					},
+					{
+						"schema": { "type": "string" },
+						"required": false,
+						"name": "category_id",
+						"in": "query"
+					},
+					{
+						"schema": { "type": "string" },
+						"required": false,
+						"name": "limit",
+						"in": "query"
+					},
+					{
+						"schema": { "type": "string" },
+						"required": false,
+						"name": "offset",
+						"in": "query"
+					},
+					{
+						"schema": { "type": "string" },
+						"required": false,
+						"name": "orderBy",
+						"in": "query"
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Posts retrieved successfully",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"success": { "type": "boolean" },
+										"result": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"id": { "type": "string", "format": "uuid" },
+													"title": { "type": "string" },
+													"content": { "type": "string" },
+													"author_id": { "type": "string", "format": "uuid" },
+													"category_id": { "type": "integer" },
+													"created_at": {
+														"type": "string",
+														"format": "date-time"
+													},
+													"updated_at": {
+														"type": "string",
+														"format": "date-time"
+													},
+													"category_name": { "type": "string" },
+													"image_url": { "type": "string" }
+												},
+												"required": [
+													"id",
+													"title",
+													"content",
+													"author_id",
+													"category_id"
+												]
+											}
+										}
+									},
+									"required": ["success", "result"]
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Bad request - Datos inválidos o mal formateados",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"success": { "type": "boolean" },
+										"errors": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"code": { "type": "number" },
+													"message": { "type": "string" }
+												},
+												"required": ["code", "message"]
+											}
+										}
+									},
+									"required": ["success", "errors"]
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Unauthorized - Autenticación requerida",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"success": { "type": "boolean" },
+										"errors": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"code": { "type": "number" },
+													"message": { "type": "string" }
+												},
+												"required": ["code", "message"]
+											}
+										}
+									},
+									"required": ["success", "errors"]
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Forbidden - Permisos insuficientes",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"success": { "type": "boolean" },
+										"errors": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"code": { "type": "number" },
+													"message": { "type": "string" }
+												},
+												"required": ["code", "message"]
+											}
+										}
+									},
+									"required": ["success", "errors"]
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Not Found - Recurso no encontrado",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"success": { "type": "boolean" },
+										"errors": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"code": { "type": "number" },
+													"message": { "type": "string" }
+												},
+												"required": ["code", "message"]
+											}
+										}
+									},
+									"required": ["success", "errors"]
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Unprocessable Entity - Error de validación",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"success": { "type": "boolean" },
+										"errors": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"code": { "type": "number" },
+													"message": { "type": "string" }
+												},
+												"required": ["code", "message"]
+											}
+										}
+									},
+									"required": ["success", "errors"]
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error - Error interno del servidor",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"success": { "type": "boolean" },
+										"errors": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"code": { "type": "number" },
+													"message": { "type": "string" }
+												},
+												"required": ["code", "message"]
+											}
+										}
+									},
+									"required": ["success", "errors"]
+								}
+							}
+						}
+					}
+				}
+			},
+			"post": {
+				"tags": ["Posts"],
+				"summary": "Create a new post",
+				"operationId": "create-post",
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"title": { "type": "string" },
+									"content": { "type": "string" },
+									"author_id": { "type": "string", "format": "uuid" },
+									"category_id": { "type": "integer" }
+								},
+								"required": ["title", "content", "author_id", "category_id"]
+							}
+						}
+					}
+				},
+				"responses": {
+					"201": {
+						"description": "Post created successfully",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"success": { "type": "boolean" },
+										"result": {
+											"type": "object",
+											"properties": {
+												"id": { "type": "string", "format": "uuid" },
+												"title": { "type": "string" },
+												"content": { "type": "string" },
+												"author_id": { "type": "string", "format": "uuid" },
+												"category_id": { "type": "integer" },
+												"created_at": {
+													"type": "string",
+													"format": "date-time"
+												},
+												"updated_at": {
+													"type": "string",
+													"format": "date-time"
+												},
+												"category_name": { "type": "string" },
+												"image_url": { "type": "string" }
+											},
+											"required": [
+												"id",
+												"title",
+												"content",
+												"author_id",
+												"category_id"
+											]
+										}
+									},
+									"required": ["success", "result"]
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Bad request - Datos inválidos o mal formateados",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"success": { "type": "boolean" },
+										"errors": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"code": { "type": "number" },
+													"message": { "type": "string" }
+												},
+												"required": ["code", "message"]
+											}
+										}
+									},
+									"required": ["success", "errors"]
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Unauthorized - Autenticación requerida",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"success": { "type": "boolean" },
+										"errors": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"code": { "type": "number" },
+													"message": { "type": "string" }
+												},
+												"required": ["code", "message"]
+											}
+										}
+									},
+									"required": ["success", "errors"]
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Forbidden - Permisos insuficientes",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"success": { "type": "boolean" },
+										"errors": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"code": { "type": "number" },
+													"message": { "type": "string" }
+												},
+												"required": ["code", "message"]
+											}
+										}
+									},
+									"required": ["success", "errors"]
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Not Found - Related resource (category_id or author_id) not found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"success": { "type": "boolean" },
+										"errors": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"code": { "type": "number" },
+													"message": { "type": "string" }
+												},
+												"required": ["code", "message"]
+											}
+										}
+									},
+									"required": ["success", "errors"]
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Unprocessable Entity - Error de validación",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"success": { "type": "boolean" },
+										"errors": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"code": { "type": "number" },
+													"message": { "type": "string" }
+												},
+												"required": ["code", "message"]
+											}
+										}
+									},
+									"required": ["success", "errors"]
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error - Error interno del servidor",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"success": { "type": "boolean" },
+										"errors": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"code": { "type": "number" },
+													"message": { "type": "string" }
+												},
+												"required": ["code", "message"]
+											}
+										}
+									},
+									"required": ["success", "errors"]
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/posts/{id}": {
+			"get": {
+				"tags": ["Posts"],
+				"summary": "Get a post by ID",
+				"operationId": "get-post",
+				"parameters": [
+					{
+						"schema": { "type": "string", "format": "uuid" },
+						"required": true,
+						"name": "id",
+						"in": "path"
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Post retrieved successfully",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"success": { "type": "boolean" },
+										"result": {
+											"type": "object",
+											"properties": {
+												"id": { "type": "string", "format": "uuid" },
+												"title": { "type": "string" },
+												"content": { "type": "string" },
+												"author_id": { "type": "string", "format": "uuid" },
+												"category_id": { "type": "integer" },
+												"created_at": {
+													"type": "string",
+													"format": "date-time"
+												},
+												"updated_at": {
+													"type": "string",
+													"format": "date-time"
+												},
+												"category_name": { "type": "string" },
+												"image_url": { "type": "string" }
+											},
+											"required": [
+												"id",
+												"title",
+												"content",
+												"author_id",
+												"category_id"
+											]
+										}
+									},
+									"required": ["success", "result"]
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Bad request - Datos inválidos o mal formateados",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"success": { "type": "boolean" },
+										"errors": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"code": { "type": "number" },
+													"message": { "type": "string" }
+												},
+												"required": ["code", "message"]
+											}
+										}
+									},
+									"required": ["success", "errors"]
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Unauthorized - Autenticación requerida",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"success": { "type": "boolean" },
+										"errors": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"code": { "type": "number" },
+													"message": { "type": "string" }
+												},
+												"required": ["code", "message"]
+											}
+										}
+									},
+									"required": ["success", "errors"]
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Forbidden - Permisos insuficientes",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"success": { "type": "boolean" },
+										"errors": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"code": { "type": "number" },
+													"message": { "type": "string" }
+												},
+												"required": ["code", "message"]
+											}
+										}
+									},
+									"required": ["success", "errors"]
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Post not found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"success": { "type": "boolean" },
+										"errors": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"code": { "type": "number" },
+													"message": { "type": "string" }
+												},
+												"required": ["code", "message"]
+											}
+										}
+									},
+									"required": ["success", "errors"]
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Unprocessable Entity - Error de validación",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"success": { "type": "boolean" },
+										"errors": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"code": { "type": "number" },
+													"message": { "type": "string" }
+												},
+												"required": ["code", "message"]
+											}
+										}
+									},
+									"required": ["success", "errors"]
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error - Error interno del servidor",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"success": { "type": "boolean" },
+										"errors": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"code": { "type": "number" },
+													"message": { "type": "string" }
+												},
+												"required": ["code", "message"]
+											}
+										}
+									},
+									"required": ["success", "errors"]
+								}
+							}
+						}
+					}
+				}
+			},
+			"put": {
+				"tags": ["Posts"],
+				"summary": "Update a post by ID",
+				"operationId": "update-post",
+				"parameters": [
+					{
+						"schema": { "type": "string", "format": "uuid" },
+						"required": true,
+						"name": "id",
+						"in": "path"
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"title": { "type": "string" },
+									"content": { "type": "string" },
+									"author_id": { "type": "string", "format": "uuid" },
+									"category_id": { "type": "integer" }
+								}
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Post updated successfully",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"success": { "type": "boolean" },
+										"result": {
+											"type": "object",
+											"properties": {
+												"id": { "type": "string", "format": "uuid" },
+												"title": { "type": "string" },
+												"content": { "type": "string" },
+												"author_id": { "type": "string", "format": "uuid" },
+												"category_id": { "type": "integer" },
+												"created_at": {
+													"type": "string",
+													"format": "date-time"
+												},
+												"updated_at": {
+													"type": "string",
+													"format": "date-time"
+												},
+												"category_name": { "type": "string" },
+												"image_url": { "type": "string" }
+											},
+											"required": [
+												"id",
+												"title",
+												"content",
+												"author_id",
+												"category_id"
+											]
+										}
+									},
+									"required": ["success", "result"]
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Bad request - Datos inválidos o mal formateados",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"success": { "type": "boolean" },
+										"errors": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"code": { "type": "number" },
+													"message": { "type": "string" }
+												},
+												"required": ["code", "message"]
+											}
+										}
+									},
+									"required": ["success", "errors"]
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Unauthorized - Autenticación requerida",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"success": { "type": "boolean" },
+										"errors": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"code": { "type": "number" },
+													"message": { "type": "string" }
+												},
+												"required": ["code", "message"]
+											}
+										}
+									},
+									"required": ["success", "errors"]
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Forbidden - Permisos insuficientes",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"success": { "type": "boolean" },
+										"errors": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"code": { "type": "number" },
+													"message": { "type": "string" }
+												},
+												"required": ["code", "message"]
+											}
+										}
+									},
+									"required": ["success", "errors"]
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Post not found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"success": { "type": "boolean" },
+										"errors": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"code": { "type": "number" },
+													"message": { "type": "string" }
+												},
+												"required": ["code", "message"]
+											}
+										}
+									},
+									"required": ["success", "errors"]
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Unprocessable Entity - Error de validación",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"success": { "type": "boolean" },
+										"errors": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"code": { "type": "number" },
+													"message": { "type": "string" }
+												},
+												"required": ["code", "message"]
+											}
+										}
+									},
+									"required": ["success", "errors"]
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error - Error interno del servidor",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"success": { "type": "boolean" },
+										"errors": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"code": { "type": "number" },
+													"message": { "type": "string" }
+												},
+												"required": ["code", "message"]
+											}
+										}
+									},
+									"required": ["success", "errors"]
+								}
+							}
+						}
+					}
+				}
+			},
+			"delete": {
+				"tags": ["Posts"],
+				"summary": "Delete a post by ID",
+				"operationId": "delete-post",
+				"parameters": [
+					{
+						"schema": { "type": "string", "format": "uuid" },
+						"required": true,
+						"name": "id",
+						"in": "path"
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Post deleted successfully",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"success": { "type": "boolean" },
+										"result": {
+											"type": "object",
+											"properties": {
+												"id": { "type": "string", "format": "uuid" }
+											},
+											"required": ["id"]
+										}
+									},
+									"required": ["success", "result"]
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Bad request - Datos inválidos o mal formateados",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"success": { "type": "boolean" },
+										"errors": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"code": { "type": "number" },
+													"message": { "type": "string" }
+												},
+												"required": ["code", "message"]
+											}
+										}
+									},
+									"required": ["success", "errors"]
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Unauthorized - Autenticación requerida",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"success": { "type": "boolean" },
+										"errors": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"code": { "type": "number" },
+													"message": { "type": "string" }
+												},
+												"required": ["code", "message"]
+											}
+										}
+									},
+									"required": ["success", "errors"]
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Forbidden - Permisos insuficientes",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"success": { "type": "boolean" },
+										"errors": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"code": { "type": "number" },
+													"message": { "type": "string" }
+												},
+												"required": ["code", "message"]
+											}
+										}
+									},
+									"required": ["success", "errors"]
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Post not found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"success": { "type": "boolean" },
+										"errors": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"code": { "type": "number" },
+													"message": { "type": "string" }
+												},
+												"required": ["code", "message"]
+											}
+										}
+									},
+									"required": ["success", "errors"]
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Unprocessable Entity - Error de validación",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"success": { "type": "boolean" },
+										"errors": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"code": { "type": "number" },
+													"message": { "type": "string" }
+												},
+												"required": ["code", "message"]
+											}
+										}
+									},
+									"required": ["success", "errors"]
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error - Error interno del servidor",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"success": { "type": "boolean" },
+										"errors": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"code": { "type": "number" },
+													"message": { "type": "string" }
+												},
+												"required": ["code", "message"]
+											}
+										}
+									},
+									"required": ["success", "errors"]
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/email": {
+			"post": {
+				"tags": ["Email"],
+				"summary": "Enviar emails de contacto",
+				"operationId": "create-email",
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"first_name": { "type": "string", "minLength": 1 },
+									"last_name": { "type": "string", "minLength": 1 },
+									"email": { "type": "string", "format": "email" },
+									"phone_number": { "type": "string", "minLength": 1 },
+									"dni_or_id": { "type": "string" },
+									"nationality": { "type": "string", "minLength": 1 },
+									"consultation_request": { "type": "string", "minLength": 1 }
+								},
+								"required": [
+									"first_name",
+									"last_name",
+									"email",
+									"phone_number",
+									"nationality",
+									"consultation_request"
+								]
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Emails enviados correctamente",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"success": { "type": "boolean" },
+										"message": { "type": "string" }
+									},
+									"required": ["success", "message"]
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Bad request - Datos inválidos o mal formateados",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"success": { "type": "boolean" },
+										"errors": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"code": { "type": "number" },
+													"message": { "type": "string" }
+												},
+												"required": ["code", "message"]
+											}
+										}
+									},
+									"required": ["success", "errors"]
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Unauthorized - Autenticación requerida",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"success": { "type": "boolean" },
+										"errors": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"code": { "type": "number" },
+													"message": { "type": "string" }
+												},
+												"required": ["code", "message"]
+											}
+										}
+									},
+									"required": ["success", "errors"]
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Forbidden - Permisos insuficientes",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"success": { "type": "boolean" },
+										"errors": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"code": { "type": "number" },
+													"message": { "type": "string" }
+												},
+												"required": ["code", "message"]
+											}
+										}
+									},
+									"required": ["success", "errors"]
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Not Found - Recurso no encontrado",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"success": { "type": "boolean" },
+										"errors": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"code": { "type": "number" },
+													"message": { "type": "string" }
+												},
+												"required": ["code", "message"]
+											}
+										}
+									},
+									"required": ["success", "errors"]
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Unprocessable Entity - Error de validación",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"success": { "type": "boolean" },
+										"errors": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"code": { "type": "number" },
+													"message": { "type": "string" }
+												},
+												"required": ["code", "message"]
+											}
+										}
+									},
+									"required": ["success", "errors"]
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error - Error interno del servidor",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"success": { "type": "boolean" },
+										"errors": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"code": { "type": "number" },
+													"message": { "type": "string" }
+												},
+												"required": ["code", "message"]
+											}
+										}
+									},
+									"required": ["success", "errors"]
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/consultations": {
+			"get": {
+				"tags": ["Consultations"],
+				"summary": "Listar todas las consultas con filtros opcionales y paginación",
+				"operationId": "list-consultations",
+				"parameters": [
+					{
+						"schema": { "type": "string" },
+						"required": false,
+						"name": "search",
+						"in": "query"
+					},
+					{
+						"schema": { "type": "string", "format": "email" },
+						"required": false,
+						"name": "user_email",
+						"in": "query"
+					},
+					{
+						"schema": { "type": "string" },
+						"required": false,
+						"name": "user_dni",
+						"in": "query"
+					},
+					{
+						"schema": { "type": "string" },
+						"required": false,
+						"name": "status",
+						"in": "query"
+					},
+					{
+						"schema": { "type": "string" },
+						"required": false,
+						"name": "limit",
+						"in": "query"
+					},
+					{
+						"schema": { "type": "string" },
+						"required": false,
+						"name": "offset",
+						"in": "query"
+					},
+					{
+						"schema": { "type": "string" },
+						"required": false,
+						"name": "orderBy",
+						"in": "query"
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Consultas obtenidas exitosamente",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"success": { "type": "boolean" },
+										"result": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"id": { "type": "string", "format": "uuid" },
+													"dni_or_id": { "type": "string" },
+													"email": { "type": "string", "format": "email" },
+													"consultation_reason": { "type": "string" },
+													"status": { "type": "string" },
+													"created_at": {
+														"type": "string",
+														"format": "date-time"
+													},
+													"updated_at": {
+														"type": "string",
+														"format": "date-time"
+													},
+													"first_name": { "type": "string" },
+													"last_name": { "type": "string" },
+													"phone_number": { "type": "string" },
+													"nationality": { "type": "string" }
+												},
+												"required": [
+													"id",
+													"email",
+													"consultation_reason",
+													"first_name",
+													"phone_number"
+												]
+											}
+										}
+									},
+									"required": ["success", "result"]
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Bad request - Datos inválidos o mal formateados",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"success": { "type": "boolean" },
+										"errors": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"code": { "type": "number" },
+													"message": { "type": "string" }
+												},
+												"required": ["code", "message"]
+											}
+										}
+									},
+									"required": ["success", "errors"]
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Unauthorized - Autenticación requerida",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"success": { "type": "boolean" },
+										"errors": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"code": { "type": "number" },
+													"message": { "type": "string" }
+												},
+												"required": ["code", "message"]
+											}
+										}
+									},
+									"required": ["success", "errors"]
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Forbidden - Permisos insuficientes",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"success": { "type": "boolean" },
+										"errors": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"code": { "type": "number" },
+													"message": { "type": "string" }
+												},
+												"required": ["code", "message"]
+											}
+										}
+									},
+									"required": ["success", "errors"]
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Unprocessable Entity - Error de validación",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"success": { "type": "boolean" },
+										"errors": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"code": { "type": "number" },
+													"message": { "type": "string" }
+												},
+												"required": ["code", "message"]
+											}
+										}
+									},
+									"required": ["success", "errors"]
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error - Error interno del servidor",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"success": { "type": "boolean" },
+										"errors": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"code": { "type": "number" },
+													"message": { "type": "string" }
+												},
+												"required": ["code", "message"]
+											}
+										}
+									},
+									"required": ["success", "errors"]
+								}
+							}
+						}
+					}
+				}
+			},
+			"post": {
+				"tags": ["Consultations"],
+				"summary": "Crear una nueva consulta",
+				"operationId": "create-consultation",
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"anyOf": [
+									{
+										"type": "object",
+										"properties": {
+											"data": {
+												"type": "object",
+												"properties": {
+													"first_name": { "type": "string", "minLength": 1 },
+													"last_name": { "type": "string" },
+													"email": { "type": "string", "format": "email" },
+													"phone_number": { "type": "string", "minLength": 1 },
+													"dni_or_id": { "type": "string" },
+													"nationality": { "type": "string" },
+													"consultation_reason": {
+														"type": "string",
+														"minLength": 1
+													}
+												},
+												"required": [
+													"first_name",
+													"email",
+													"phone_number",
+													"consultation_reason"
+												]
+											}
+										},
+										"required": ["data"]
+									},
+									{
+										"type": "object",
+										"properties": {
+											"first_name": { "type": "string", "minLength": 1 },
+											"last_name": { "type": "string" },
+											"email": { "type": "string", "format": "email" },
+											"phone_number": { "type": "string", "minLength": 1 },
+											"dni_or_id": { "type": "string" },
+											"nationality": { "type": "string" },
+											"consultation_reason": {
+												"type": "string",
+												"minLength": 1
+											}
+										},
+										"required": [
+											"first_name",
+											"email",
+											"phone_number",
+											"consultation_reason"
+										]
+									}
+								]
+							}
+						}
+					}
+				},
+				"responses": {
+					"201": {
+						"description": "Consulta creada exitosamente",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"success": { "type": "boolean" },
+										"result": {
+											"type": "object",
+											"properties": {
+												"id": { "type": "string", "format": "uuid" },
+												"dni_or_id": { "type": "string" },
+												"email": { "type": "string", "format": "email" },
+												"consultation_reason": { "type": "string" },
+												"status": { "type": "string" },
+												"created_at": {
+													"type": "string",
+													"format": "date-time"
+												},
+												"updated_at": {
+													"type": "string",
+													"format": "date-time"
+												},
+												"first_name": { "type": "string" },
+												"last_name": { "type": "string" },
+												"phone_number": { "type": "string" },
+												"nationality": { "type": "string" }
+											},
+											"required": [
+												"id",
+												"email",
+												"consultation_reason",
+												"first_name",
+												"phone_number"
+											]
+										}
+									},
+									"required": ["success", "result"]
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Bad request - Datos inválidos o mal formateados",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"success": { "type": "boolean" },
+										"errors": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"code": { "type": "number" },
+													"message": { "type": "string" }
+												},
+												"required": ["code", "message"]
+											}
+										}
+									},
+									"required": ["success", "errors"]
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Unauthorized - Autenticación requerida",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"success": { "type": "boolean" },
+										"errors": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"code": { "type": "number" },
+													"message": { "type": "string" }
+												},
+												"required": ["code", "message"]
+											}
+										}
+									},
+									"required": ["success", "errors"]
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Forbidden - Permisos insuficientes",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"success": { "type": "boolean" },
+										"errors": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"code": { "type": "number" },
+													"message": { "type": "string" }
+												},
+												"required": ["code", "message"]
+											}
+										}
+									},
+									"required": ["success", "errors"]
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Not Found - Recurso no encontrado",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"success": { "type": "boolean" },
+										"errors": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"code": { "type": "number" },
+													"message": { "type": "string" }
+												},
+												"required": ["code", "message"]
+											}
+										}
+									},
+									"required": ["success", "errors"]
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Unprocessable Entity - Error de validación",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"success": { "type": "boolean" },
+										"errors": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"code": { "type": "number" },
+													"message": { "type": "string" }
+												},
+												"required": ["code", "message"]
+											}
+										}
+									},
+									"required": ["success", "errors"]
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error - Error interno del servidor",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"success": { "type": "boolean" },
+										"errors": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"code": { "type": "number" },
+													"message": { "type": "string" }
+												},
+												"required": ["code", "message"]
+											}
+										}
+									},
+									"required": ["success", "errors"]
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/consultations/{id}": {
+			"get": {
+				"tags": ["Consultations"],
+				"summary": "Obtener una consulta por ID",
+				"operationId": "get-consultation",
+				"parameters": [
+					{
+						"schema": { "type": "string", "format": "uuid" },
+						"required": true,
+						"name": "id",
+						"in": "path"
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Consulta obtenida exitosamente",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"success": { "type": "boolean" },
+										"result": {
+											"type": "object",
+											"properties": {
+												"id": { "type": "string", "format": "uuid" },
+												"dni_or_id": { "type": "string" },
+												"email": { "type": "string", "format": "email" },
+												"consultation_reason": { "type": "string" },
+												"status": { "type": "string" },
+												"created_at": {
+													"type": "string",
+													"format": "date-time"
+												},
+												"updated_at": {
+													"type": "string",
+													"format": "date-time"
+												},
+												"first_name": { "type": "string" },
+												"last_name": { "type": "string" },
+												"phone_number": { "type": "string" },
+												"nationality": { "type": "string" }
+											},
+											"required": [
+												"id",
+												"email",
+												"consultation_reason",
+												"first_name",
+												"phone_number"
+											]
+										}
+									},
+									"required": ["success", "result"]
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Bad request - Datos inválidos o mal formateados",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"success": { "type": "boolean" },
+										"errors": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"code": { "type": "number" },
+													"message": { "type": "string" }
+												},
+												"required": ["code", "message"]
+											}
+										}
+									},
+									"required": ["success", "errors"]
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Unauthorized - Autenticación requerida",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"success": { "type": "boolean" },
+										"errors": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"code": { "type": "number" },
+													"message": { "type": "string" }
+												},
+												"required": ["code", "message"]
+											}
+										}
+									},
+									"required": ["success", "errors"]
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Forbidden - Permisos insuficientes",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"success": { "type": "boolean" },
+										"errors": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"code": { "type": "number" },
+													"message": { "type": "string" }
+												},
+												"required": ["code", "message"]
+											}
+										}
+									},
+									"required": ["success", "errors"]
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Consulta no encontrada",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"success": { "type": "boolean" },
+										"errors": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"code": { "type": "number" },
+													"message": { "type": "string" }
+												},
+												"required": ["code", "message"]
+											}
+										}
+									},
+									"required": ["success", "errors"]
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Unprocessable Entity - Error de validación",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"success": { "type": "boolean" },
+										"errors": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"code": { "type": "number" },
+													"message": { "type": "string" }
+												},
+												"required": ["code", "message"]
+											}
+										}
+									},
+									"required": ["success", "errors"]
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error - Error interno del servidor",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"success": { "type": "boolean" },
+										"errors": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"code": { "type": "number" },
+													"message": { "type": "string" }
+												},
+												"required": ["code", "message"]
+											}
+										}
+									},
+									"required": ["success", "errors"]
+								}
+							}
+						}
+					}
+				}
+			},
+			"put": {
+				"tags": ["Consultations"],
+				"summary": "Actualizar una consulta por ID",
+				"operationId": "update-consultation",
+				"parameters": [
+					{
+						"schema": { "type": "string", "format": "uuid" },
+						"required": true,
+						"name": "id",
+						"in": "path"
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"dni_or_id": { "type": "string" },
+									"email": { "type": "string", "format": "email" },
+									"consultation_reason": { "type": "string" },
+									"first_name": { "type": "string" },
+									"phone_number": { "type": "string" },
+									"status": { "type": "string" },
+									"last_name": { "type": "string" },
+									"nationality": { "type": "string" }
+								}
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Consulta actualizada exitosamente",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"success": { "type": "boolean" },
+										"result": {
+											"type": "object",
+											"properties": {
+												"id": { "type": "string", "format": "uuid" },
+												"dni_or_id": { "type": "string" },
+												"email": { "type": "string", "format": "email" },
+												"consultation_reason": { "type": "string" },
+												"status": { "type": "string" },
+												"created_at": {
+													"type": "string",
+													"format": "date-time"
+												},
+												"updated_at": {
+													"type": "string",
+													"format": "date-time"
+												},
+												"first_name": { "type": "string" },
+												"last_name": { "type": "string" },
+												"phone_number": { "type": "string" },
+												"nationality": { "type": "string" }
+											},
+											"required": [
+												"id",
+												"email",
+												"consultation_reason",
+												"first_name",
+												"phone_number"
+											]
+										}
+									},
+									"required": ["success", "result"]
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Bad request - Datos inválidos o mal formateados",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"success": { "type": "boolean" },
+										"errors": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"code": { "type": "number" },
+													"message": { "type": "string" }
+												},
+												"required": ["code", "message"]
+											}
+										}
+									},
+									"required": ["success", "errors"]
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Unauthorized - Autenticación requerida",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"success": { "type": "boolean" },
+										"errors": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"code": { "type": "number" },
+													"message": { "type": "string" }
+												},
+												"required": ["code", "message"]
+											}
+										}
+									},
+									"required": ["success", "errors"]
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Forbidden - Permisos insuficientes",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"success": { "type": "boolean" },
+										"errors": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"code": { "type": "number" },
+													"message": { "type": "string" }
+												},
+												"required": ["code", "message"]
+											}
+										}
+									},
+									"required": ["success", "errors"]
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Consulta no encontrada",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"success": { "type": "boolean" },
+										"errors": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"code": { "type": "number" },
+													"message": { "type": "string" }
+												},
+												"required": ["code", "message"]
+											}
+										}
+									},
+									"required": ["success", "errors"]
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Unprocessable Entity - Error de validación",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"success": { "type": "boolean" },
+										"errors": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"code": { "type": "number" },
+													"message": { "type": "string" }
+												},
+												"required": ["code", "message"]
+											}
+										}
+									},
+									"required": ["success", "errors"]
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error - Error interno del servidor",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"success": { "type": "boolean" },
+										"errors": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"code": { "type": "number" },
+													"message": { "type": "string" }
+												},
+												"required": ["code", "message"]
+											}
+										}
+									},
+									"required": ["success", "errors"]
+								}
+							}
+						}
+					}
+				}
+			},
+			"delete": {
+				"tags": ["Consultations"],
+				"summary": "Eliminar una consulta por ID",
+				"operationId": "delete-consultation",
+				"parameters": [
+					{
+						"schema": { "type": "string", "format": "uuid" },
+						"required": true,
+						"name": "id",
+						"in": "path"
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Consulta eliminada exitosamente",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"success": { "type": "boolean" },
+										"result": {
+											"type": "object",
+											"properties": {
+												"id": { "type": "string", "format": "uuid" }
+											},
+											"required": ["id"]
+										}
+									},
+									"required": ["success", "result"]
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Bad request - Datos inválidos o mal formateados",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"success": { "type": "boolean" },
+										"errors": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"code": { "type": "number" },
+													"message": { "type": "string" }
+												},
+												"required": ["code", "message"]
+											}
+										}
+									},
+									"required": ["success", "errors"]
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Unauthorized - Autenticación requerida",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"success": { "type": "boolean" },
+										"errors": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"code": { "type": "number" },
+													"message": { "type": "string" }
+												},
+												"required": ["code", "message"]
+											}
+										}
+									},
+									"required": ["success", "errors"]
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Forbidden - Permisos insuficientes",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"success": { "type": "boolean" },
+										"errors": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"code": { "type": "number" },
+													"message": { "type": "string" }
+												},
+												"required": ["code", "message"]
+											}
+										}
+									},
+									"required": ["success", "errors"]
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Consulta no encontrada",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"success": { "type": "boolean" },
+										"errors": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"code": { "type": "number" },
+													"message": { "type": "string" }
+												},
+												"required": ["code", "message"]
+											}
+										}
+									},
+									"required": ["success", "errors"]
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Unprocessable Entity - Error de validación",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"success": { "type": "boolean" },
+										"errors": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"code": { "type": "number" },
+													"message": { "type": "string" }
+												},
+												"required": ["code", "message"]
+											}
+										}
+									},
+									"required": ["success", "errors"]
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error - Error interno del servidor",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"success": { "type": "boolean" },
+										"errors": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"code": { "type": "number" },
+													"message": { "type": "string" }
+												},
+												"required": ["code", "message"]
+											}
+										}
+									},
+									"required": ["success", "errors"]
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/categories": {
+			"get": {
+				"tags": ["Categories"],
+				"summary": "List all categories",
+				"operationId": "list-categories",
+				"responses": {
+					"200": {
+						"description": "Categories retrieved successfully",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"success": { "type": "boolean" },
+										"result": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"id": { "type": "integer" },
+													"name": { "type": "string" },
+													"description": { "type": ["string", "null"] },
+													"created_at": {
+														"type": "string",
+														"format": "date-time"
+													},
+													"updated_at": {
+														"type": "string",
+														"format": "date-time"
+													}
+												},
+												"required": ["id", "name"]
+											}
+										}
+									},
+									"required": ["success", "result"]
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Bad request - Datos inválidos o mal formateados",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"success": { "type": "boolean" },
+										"errors": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"code": { "type": "number" },
+													"message": { "type": "string" }
+												},
+												"required": ["code", "message"]
+											}
+										}
+									},
+									"required": ["success", "errors"]
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Unauthorized - Autenticación requerida",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"success": { "type": "boolean" },
+										"errors": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"code": { "type": "number" },
+													"message": { "type": "string" }
+												},
+												"required": ["code", "message"]
+											}
+										}
+									},
+									"required": ["success", "errors"]
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Forbidden - Permisos insuficientes",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"success": { "type": "boolean" },
+										"errors": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"code": { "type": "number" },
+													"message": { "type": "string" }
+												},
+												"required": ["code", "message"]
+											}
+										}
+									},
+									"required": ["success", "errors"]
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Not Found - Recurso no encontrado",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"success": { "type": "boolean" },
+										"errors": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"code": { "type": "number" },
+													"message": { "type": "string" }
+												},
+												"required": ["code", "message"]
+											}
+										}
+									},
+									"required": ["success", "errors"]
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Unprocessable Entity - Error de validación",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"success": { "type": "boolean" },
+										"errors": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"code": { "type": "number" },
+													"message": { "type": "string" }
+												},
+												"required": ["code", "message"]
+											}
+										}
+									},
+									"required": ["success", "errors"]
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error - Error interno del servidor",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"success": { "type": "boolean" },
+										"errors": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"code": { "type": "number" },
+													"message": { "type": "string" }
+												},
+												"required": ["code", "message"]
+											}
+										}
+									},
+									"required": ["success", "errors"]
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/upload": {
+			"post": {
+				"tags": ["Upload"],
+				"summary": "Upload an image",
+				"operationId": "upload-image",
+				"requestBody": {
+					"content": {
+						"multipart/form-data": {
+							"schema": {
+								"type": "object",
+								"properties": { "file": {} },
+								"required": ["file"]
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Image uploaded successfully",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"success": { "type": "boolean" },
+										"result": {
+											"type": "object",
+											"properties": { "url": { "type": "string" } },
+											"required": ["url"]
+										}
+									},
+									"required": ["success", "result"]
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Bad Request",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"success": { "type": "boolean" },
+										"errors": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"code": { "type": "number" },
+													"message": { "type": "string" }
+												},
+												"required": ["code", "message"]
+											}
+										}
+									},
+									"required": ["success", "errors"]
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"success": { "type": "boolean" },
+										"errors": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"code": { "type": "number" },
+													"message": { "type": "string" }
+												},
+												"required": ["code", "message"]
+											}
+										}
+									},
+									"required": ["success", "errors"]
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/dummy/{slug}": {
+			"post": {
+				"tags": ["Dummy"],
+				"summary": "this endpoint is an example",
+				"operationId": "example-endpoint",
+				"parameters": [
+					{
+						"schema": { "type": "string" },
+						"required": true,
+						"name": "slug",
+						"in": "path"
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": { "name": { "type": "string" } },
+								"required": ["name"]
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Returns the log details",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"success": { "type": "boolean" },
+										"result": {
+											"type": "object",
+											"properties": {
+												"msg": { "type": "string" },
+												"slug": { "type": "string" },
+												"name": { "type": "string" }
+											},
+											"required": ["msg", "slug", "name"]
+										}
+									},
+									"required": ["success", "result"]
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Bad request - Datos inválidos o mal formateados",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"success": { "type": "boolean" },
+										"errors": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"code": { "type": "number" },
+													"message": { "type": "string" }
+												},
+												"required": ["code", "message"]
+											}
+										}
+									},
+									"required": ["success", "errors"]
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Unauthorized - Autenticación requerida",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"success": { "type": "boolean" },
+										"errors": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"code": { "type": "number" },
+													"message": { "type": "string" }
+												},
+												"required": ["code", "message"]
+											}
+										}
+									},
+									"required": ["success", "errors"]
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Forbidden - Permisos insuficientes",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"success": { "type": "boolean" },
+										"errors": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"code": { "type": "number" },
+													"message": { "type": "string" }
+												},
+												"required": ["code", "message"]
+											}
+										}
+									},
+									"required": ["success", "errors"]
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Not Found - Recurso no encontrado",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"success": { "type": "boolean" },
+										"errors": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"code": { "type": "number" },
+													"message": { "type": "string" }
+												},
+												"required": ["code", "message"]
+											}
+										}
+									},
+									"required": ["success", "errors"]
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Unprocessable Entity - Error de validación",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"success": { "type": "boolean" },
+										"errors": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"code": { "type": "number" },
+													"message": { "type": "string" }
+												},
+												"required": ["code", "message"]
+											}
+										}
+									},
+									"required": ["success", "errors"]
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error - Error interno del servidor",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"success": { "type": "boolean" },
+										"errors": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"code": { "type": "number" },
+													"message": { "type": "string" }
+												},
+												"required": ["code", "message"]
+											}
+										}
+									},
+									"required": ["success", "errors"]
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	},
+	"webhooks": {}
+}
