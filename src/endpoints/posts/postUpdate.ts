@@ -19,8 +19,8 @@ export class PostUpdate extends OpenAPIRoute {
         PostModel.schema.pick({
           title: true,
           content: true,
-          author_id: true,
           category_id: true,
+          image_url: true,
         }).partial(),
       ),
     },
@@ -49,8 +49,8 @@ export class PostUpdate extends OpenAPIRoute {
     const updateData: PostUpdateData = {};
     if (data.body.title !== undefined) updateData.title = data.body.title;
     if (data.body.content !== undefined) updateData.content = data.body.content;
-    if (data.body.author_id !== undefined) updateData.author_id = data.body.author_id;
     if (data.body.category_id !== undefined) updateData.category_id = data.body.category_id;
+    if (data.body.image_url !== undefined) updateData.image_url = data.body.image_url;
 
     console.log("[ACTUALIZAR POST] Datos de actualización preparados:", JSON.stringify(updateData, null, 2));
     console.log("[ACTUALIZAR POST] Campos a actualizar:", Object.keys(updateData).join(", "));

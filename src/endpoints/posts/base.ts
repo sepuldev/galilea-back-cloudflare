@@ -3,14 +3,13 @@ import { z } from "zod";
 
 export const post = z.object({
   id: z.string().uuid(),
-  title: z.string(),
-  content: z.string(),
-  author_id: z.string().uuid(),
-  category_id: z.number().int(),
+  title: z.string().nullable(),
+  content: z.string().nullable(),
+  category_id: z.number().int().nullable(),
   created_at: z.string().datetime().optional(),
   updated_at: z.string().datetime().optional(),
-  category_name: z.string().optional(), // Nombre de la categoría desde el JOIN
-  image_url: z.string().optional(), // URL de la imagen del post
+  image_url: z.string().nullable().optional(), // URL de la imagen del post
+  category_name: z.string().optional(), // Nombre de la categoría desde el JOIN (no está en la tabla)
 });
 
 export const PostModel = {

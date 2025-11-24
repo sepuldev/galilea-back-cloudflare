@@ -17,15 +17,15 @@ export class PostCreate extends OpenAPIRoute {
         PostModel.schema.pick({
           title: true,
           content: true,
-          author_id: true,
           category_id: true,
+          image_url: true,
         }),
       ),
     },
     responses: createCRUDResponses(PostModel.schema, {
       include201: true,
       custom201Description: "Post created successfully",
-      custom404Description: "Not Found - Related resource (category_id or author_id) not found",
+      custom404Description: "Not Found - Related resource (category_id) not found",
     }),
   };
 

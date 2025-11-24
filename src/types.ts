@@ -112,10 +112,10 @@ export interface ConsultationUpdateData {
  * Tipo para los campos que se pueden actualizar en un post
  */
 export interface PostUpdateData {
-  title?: string;
-  content?: string;
-  author_id?: string;
-  category_id?: number;
+  title?: string | null;
+  content?: string | null;
+  category_id?: number | null;
+  image_url?: string | null;
 }
 
 // ============================================================================
