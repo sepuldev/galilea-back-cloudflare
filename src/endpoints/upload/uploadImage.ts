@@ -77,11 +77,13 @@ export class UploadImage extends OpenAPIRoute {
         const sanitizedName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
         const fileName = `${Date.now()}-${sanitizedName}`;
 
-        // Upload to 'posts' bucket
+        // Upload to 'galilea-posts' bucket in 'posts' folder
+        // El bucket se llama 'galilea-posts' y las imágenes van en la carpeta 'posts'
+        const uploadPath = `posts/${fileName}`;
         const { data, error } = await supabase
             .storage
-            .from('posts')
-            .upload(fileName, file, {
+            .from('galilea-posts')
+            .upload(uploadPath, file, {
                 contentType: file.type,
                 upsert: false
             });
@@ -91,11 +93,14 @@ export class UploadImage extends OpenAPIRoute {
             return c.json({ success: false, errors: [{ code: 500, message: error.message }] }, 500);
         }
 
-        // Get public URL
+        // Usar la ruta devuelta por Supabase (data.path) o la ruta que usamos para subir
+        const filePath = data?.path || uploadPath;
+
+        // Get public URL usando la ruta correcta
         const { data: { publicUrl } } = supabase
             .storage
-            .from('posts')
-            .getPublicUrl(fileName);
+            .from('galilea-posts')
+            .getPublicUrl(filePath);
 
         return c.json({
             success: true,
