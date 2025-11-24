@@ -298,9 +298,16 @@ const openapi = fromHono(app, {
   },
 });
 
+import { categoriesRouter } from "./endpoints/categories/router";
+import { uploadRouter } from "./endpoints/upload/router";
+
+// ... existing imports ...
+
 openapi.route("/posts", postsRouter);
 openapi.route("/email", emailRouter);
 openapi.route("/consultations", consultationsRouter);
+openapi.route("/categories", categoriesRouter);
+openapi.route("/upload", uploadRouter);
 
 openapi.post("/dummy/:slug", DummyEndpoint);
 
