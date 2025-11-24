@@ -314,4 +314,4 @@ openapi.post("/dummy/:slug", DummyEndpoint);
 /* ============================================================
    EXPORT
    ============================================================ */
-export default app;
+export default openapi;
