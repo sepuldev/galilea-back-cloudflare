@@ -2,10 +2,10 @@ import { z } from "zod";
 
 export const category = z.object({
     id: z.number().int(),
-    name: z.string(),
-    description: z.string().optional().nullable(),
-    created_at: z.string().datetime().optional(),
-    updated_at: z.string().datetime().optional(),
+    name: z.string().nullable().optional(),
+    description: z.string().nullable().optional(),
+    created_at: z.string().datetime().nullable().optional(),
+    updated_at: z.string().datetime().nullable().optional(),
 });
 
 export const CategoryModel = {

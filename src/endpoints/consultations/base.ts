@@ -2,16 +2,16 @@ import { z } from "zod";
 
 export const consultation = z.object({
   id: z.string().uuid(),
-  dni_or_id: z.string().optional(),
-  email: z.string().email(),
-  consultation_reason: z.string(),
-  status: z.string().optional(),
-  created_at: z.string().datetime().optional(),
-  updated_at: z.string().datetime().optional(),
-  first_name: z.string(),
-  last_name: z.string().optional(),
-  phone_number: z.string(),
-  nationality: z.string().optional(),
+  dni_or_id: z.string().nullable().optional(),
+  email: z.string().email().nullable().optional(),
+  consultation_reason: z.string().nullable().optional(),
+  status: z.string().nullable().optional(),
+  created_at: z.string().datetime().nullable().optional(),
+  updated_at: z.string().datetime().nullable().optional(),
+  first_name: z.string().nullable().optional(),
+  last_name: z.string().nullable().optional(),
+  phone_number: z.string().nullable().optional(),
+  nationality: z.string().nullable().optional(),
 });
 
 export const ConsultationModel = {

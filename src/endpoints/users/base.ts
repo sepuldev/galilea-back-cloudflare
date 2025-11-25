@@ -1,12 +1,12 @@
 import { z } from "zod";
 
 export const user = z.object({
-    dni: z.string().uuid(),
-    email: z.string(),
-    name: z.string(),
-    phone: z.string(),
-    created_at: z.string().datetime().optional(),
-    updated_at: z.string().datetime().optional(),
+    dni: z.string().nullable().optional(),
+    email: z.string().email().nullable().optional(),
+    name: z.string().nullable().optional(),
+    phone: z.string().nullable().optional(),
+    created_at: z.string().datetime().nullable().optional(),
+    updated_at: z.string().datetime().nullable().optional(),
 })
 
 export const UserModel= {
