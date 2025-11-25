@@ -4,7 +4,6 @@ import { CategoryModel } from "./base";
 import { getSupabaseClient } from "../../supabase";
 import { z } from "zod";
 import { createCRUDResponses } from "../../shared/responses";
-import { checkAuth } from "../../shared/auth";
 
 export class CategoryRead extends OpenAPIRoute {
     public schema = {
@@ -24,9 +23,7 @@ export class CategoryRead extends OpenAPIRoute {
     };
 
     public async handle(c: AppContext) {
-        // Verificar autenticación
-        const authError = checkAuth(c);
-        if (authError) return authError;
+        // Endpoint público - no requiere autenticación
 
         console.log("[LEER CATEGORÍA] Iniciando solicitud GET /categories/:id");
         const data = await this.getValidatedData<typeof this.schema>();

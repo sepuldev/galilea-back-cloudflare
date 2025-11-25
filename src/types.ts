@@ -24,7 +24,22 @@ export interface ExtendedEnv extends Env {
 // CONTEXT TYPES
 // ============================================================================
 
-export type AppContext = Context<{ Bindings: Env }>;
+/**
+ * Interfaz para el contexto de autenticación
+ */
+export interface AuthContext {
+  user: any; // User de Supabase
+  userId: string;
+  role: string;
+  username?: string;
+}
+
+export type AppContext = Context<{ 
+  Bindings: Env;
+  Variables: {
+    auth: AuthContext;
+  };
+}>;
 export type HandleArgs = [AppContext];
 
 // ============================================================================

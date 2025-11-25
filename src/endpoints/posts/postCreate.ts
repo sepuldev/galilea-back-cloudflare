@@ -4,7 +4,7 @@ import { AppContext } from "../../types";
 import { PostModel } from "./base";
 import { getSupabaseClient } from "../../supabase";
 import { createCRUDResponses } from "../../shared/responses";
-import { checkAuth } from "../../shared/auth";
+import { checkAuth, checkRole } from "../../shared/auth";
 import { checkRateLimit } from "../../shared/rateLimit";
 
 export class PostCreate extends OpenAPIRoute {
@@ -30,9 +30,12 @@ export class PostCreate extends OpenAPIRoute {
   };
 
   public async handle(c: AppContext) {
-    // Verificar autenticación
-    const authError = checkAuth(c);
+    // Verificar autenticación y rol de admin
+    const authError = await checkAuth(c);
     if (authError) return authError;
+    
+    const roleError = checkRole(c, "admin");
+    if (roleError) return roleError;
 
     // Rate limiting
     const rateLimitError = checkRateLimit(c);

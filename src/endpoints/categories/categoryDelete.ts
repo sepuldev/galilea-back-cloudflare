@@ -4,7 +4,7 @@ import { CategoryModel } from "./base";
 import { getSupabaseServiceClient } from "../../supabase";
 import { z } from "zod";
 import { createCRUDResponses } from "../../shared/responses";
-import { checkAuth } from "../../shared/auth";
+import { checkAuth, checkRole } from "../../shared/auth";
 
 export class CategoryDelete extends OpenAPIRoute {
     public schema = {
@@ -24,9 +24,12 @@ export class CategoryDelete extends OpenAPIRoute {
     };
 
     public async handle(c: AppContext) {
-        // Verificar autenticación
-        const authError = checkAuth(c);
+        // Verificar autenticación y rol de admin
+        const authError = await checkAuth(c);
         if (authError) return authError;
+        
+        const roleError = checkRole(c, "admin");
+        if (roleError) return roleError;
 
         console.log("[ELIMINAR CATEGORÍA] Iniciando solicitud DELETE /categories/:id");
         const data = await this.getValidatedData<typeof this.schema>();

@@ -3,7 +3,7 @@ import { AppContext } from "../../types";
 import { CategoryModel } from "./base";
 import { getSupabaseServiceClient } from "../../supabase";
 import { createCRUDResponses } from "../../shared/responses";
-import { checkAuth } from "../../shared/auth";
+import { checkAuth, checkRole } from "../../shared/auth";
 
 export class CategoryCreate extends OpenAPIRoute {
     public schema = {
@@ -25,9 +25,12 @@ export class CategoryCreate extends OpenAPIRoute {
     };
 
     public async handle(c: AppContext) {
-        // Verificar autenticación
-        const authError = checkAuth(c);
+        // Verificar autenticación y rol de admin
+        const authError = await checkAuth(c);
         if (authError) return authError;
+        
+        const roleError = checkRole(c, "admin");
+        if (roleError) return roleError;
 
         console.log("[CREAR CATEGORÍA] Iniciando solicitud POST /categories");
         const data = await this.getValidatedData<typeof this.schema>();

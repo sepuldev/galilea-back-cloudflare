@@ -6,6 +6,7 @@ import { emailRouter } from "./endpoints/email/router";
 import { consultationsRouter } from "./endpoints/consultations/router";
 import { categoriesRouter } from "./endpoints/categories/router";
 import { uploadRouter } from "./endpoints/upload/router";
+import { authRouter } from "./endpoints/auth/router";
 import { ContentfulStatusCode } from "hono/utils/http-status";
 import { DummyEndpoint } from "./endpoints/dummyEndpoint";
 import { getCorsConfig } from "./shared/corsConfig";
@@ -134,6 +135,7 @@ openapi.route("/email", emailRouter);
 openapi.route("/consultations", consultationsRouter);
 openapi.route("/categories", categoriesRouter);
 openapi.route("/upload", uploadRouter);
+openapi.route("/auth", authRouter);
 
 openapi.post("/dummy/:slug", DummyEndpoint);
 

@@ -2,6 +2,7 @@ import { OpenAPIRoute } from "chanfana";
 import { AppContext } from "../../types";
 import { getSupabaseServiceClient } from "../../supabase";
 import { z } from "zod";
+import { checkAuth, checkRole } from "../../shared/auth";
 
 export class UploadImage extends OpenAPIRoute {
     public schema = {
@@ -65,6 +66,13 @@ export class UploadImage extends OpenAPIRoute {
     };
 
     public async handle(c: AppContext) {
+        // Verificar autenticación y rol de admin
+        const authError = await checkAuth(c);
+        if (authError) return authError;
+        
+        const roleError = checkRole(c, "admin");
+        if (roleError) return roleError;
+
         const formData = await c.req.parseBody();
         const file = formData['file'];
 

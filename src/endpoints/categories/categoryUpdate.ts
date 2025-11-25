@@ -4,7 +4,7 @@ import { CategoryModel } from "./base";
 import { getSupabaseServiceClient } from "../../supabase";
 import { z } from "zod";
 import { createCRUDResponses } from "../../shared/responses";
-import { checkAuth } from "../../shared/auth";
+import { checkAuth, checkRole } from "../../shared/auth";
 
 export class CategoryUpdate extends OpenAPIRoute {
     public schema = {
@@ -34,12 +34,15 @@ export class CategoryUpdate extends OpenAPIRoute {
         console.log("[ACTUALIZAR CATEGORÍA] Método:", c.req.method);
         console.log("[ACTUALIZAR CATEGORÍA] Path:", c.req.path);
         
-        // Verificar autenticación
-        const authError = checkAuth(c);
+        // Verificar autenticación y rol de admin
+        const authError = await checkAuth(c);
         if (authError) {
             console.log("[ACTUALIZAR CATEGORÍA] Error de autenticación");
             return authError;
         }
+        
+        const roleError = checkRole(c, "admin");
+        if (roleError) return roleError;
 
         console.log("[ACTUALIZAR CATEGORÍA] Iniciando solicitud PUT /categories/:id");
         const data = await this.getValidatedData<typeof this.schema>();

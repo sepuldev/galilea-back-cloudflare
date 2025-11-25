@@ -2,7 +2,6 @@ import { OpenAPIRoute } from "chanfana";
 import { AppContext } from "../../types";
 import { getSupabaseServiceClient } from "../../supabase";
 import { z } from "zod";
-import { checkAuth } from "../../shared/auth";
 
 export class ListImages extends OpenAPIRoute {
     public schema = {
@@ -64,9 +63,7 @@ export class ListImages extends OpenAPIRoute {
     };
 
     public async handle(c: AppContext) {
-        // Verificar autenticación
-        const authError = checkAuth(c);
-        if (authError) return authError;
+        // Endpoint público - no requiere autenticación
 
         const data = await this.getValidatedData<typeof this.schema>();
         const limit = parseInt(data.query?.limit || "100", 10);
