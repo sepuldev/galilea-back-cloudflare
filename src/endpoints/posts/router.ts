@@ -9,9 +9,9 @@ import { PostDelete } from "./postDelete";
 
 export const postsRouter = fromHono(new Hono());
 
-postsRouter.get("/", PostList);
-postsRouter.post("/", PostCreate);
-postsRouter.get("/:id", PostRead);
-postsRouter.put("/:id", PostUpdate);
-postsRouter.delete("/:id", PostDelete);
+postsRouter.get("/", new PostList());
+postsRouter.post("/", new PostCreate());
+postsRouter.get("/:id", new PostRead());
+postsRouter.put("/:id", new PostUpdate());
+postsRouter.delete("/:id", new PostDelete());
 

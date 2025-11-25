@@ -4,4 +4,4 @@ import { EmailCreate } from "./emailCreate";
 
 export const emailRouter = fromHono(new Hono());
 
-emailRouter.post("/", EmailCreate);
+emailRouter.post("/", new EmailCreate());

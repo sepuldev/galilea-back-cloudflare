@@ -8,10 +8,10 @@ import { CategoryDelete } from "./categoryDelete";
 
 const honoRouter = new Hono();
 
-honoRouter.get("/", CategoryList);
-honoRouter.post("/", CategoryCreate);
-honoRouter.get("/:id", CategoryRead);
-honoRouter.put("/:id", CategoryUpdate);
-honoRouter.delete("/:id", CategoryDelete);
+honoRouter.get("/", new CategoryList());
+honoRouter.post("/", new CategoryCreate());
+honoRouter.get("/:id", new CategoryRead());
+honoRouter.put("/:id", new CategoryUpdate());
+honoRouter.delete("/:id", new CategoryDelete());
 
 export const categoriesRouter = fromHono(honoRouter);
