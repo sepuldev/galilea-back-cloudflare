@@ -6,12 +6,10 @@ import { CategoryRead } from "./categoryRead";
 import { CategoryUpdate } from "./categoryUpdate";
 import { CategoryDelete } from "./categoryDelete";
 
-const honoRouter = new Hono();
+export const categoriesRouter = fromHono(new Hono());
 
-honoRouter.get("/", new CategoryList());
-honoRouter.post("/", new CategoryCreate());
-honoRouter.get("/:id", new CategoryRead());
-honoRouter.put("/:id", new CategoryUpdate());
-honoRouter.delete("/:id", new CategoryDelete());
-
-export const categoriesRouter = fromHono(honoRouter);
+categoriesRouter.get("/", CategoryList);
+categoriesRouter.post("/", CategoryCreate);
+categoriesRouter.get("/:id", CategoryRead);
+categoriesRouter.put("/:id", CategoryUpdate);
+categoriesRouter.delete("/:id", CategoryDelete);

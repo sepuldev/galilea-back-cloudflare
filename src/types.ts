@@ -94,14 +94,14 @@ export interface ConsultationInsertData {
  * Tipo para los campos que se pueden actualizar en una consulta
  */
 export interface ConsultationUpdateData {
-  dni_or_id?: string;
-  email?: string;
-  consultation_reason?: string;
-  first_name?: string;
-  phone_number?: string;
-  status?: string;
-  last_name?: string;
-  nationality?: string;
+  dni_or_id?: string | null;
+  email?: string | null;
+  consultation_reason?: string | null;
+  first_name?: string | null;
+  phone_number?: string | null;
+  status?: string | null;
+  last_name?: string | null;
+  nationality?: string | null;
 }
 
 // ============================================================================

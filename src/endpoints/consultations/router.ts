@@ -8,9 +8,9 @@ import { ConsultationDelete } from "./consultationDelete";
 
 export const consultationsRouter = fromHono(new Hono());
 
-consultationsRouter.get("/", new ConsultationList());
-consultationsRouter.post("/", new ConsultationCreate());
-consultationsRouter.get("/:id", new ConsultationRead());
-consultationsRouter.put("/:id", new ConsultationUpdate());
-consultationsRouter.delete("/:id", new ConsultationDelete());
+consultationsRouter.get("/", ConsultationList);
+consultationsRouter.post("/", ConsultationCreate);
+consultationsRouter.get("/:id", ConsultationRead);
+consultationsRouter.put("/:id", ConsultationUpdate);
+consultationsRouter.delete("/:id", ConsultationDelete);
 
