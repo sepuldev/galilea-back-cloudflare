@@ -35,8 +35,9 @@ export class PostUpdate extends OpenAPIRoute {
     // Verificar autenticación y rol de admin
     const authError = await checkAuth(c);
     if (authError) return authError;
-    
-    const roleError = checkRole(c, "admin");
+
+    // Requiere nivel editor o superior (editor, moderator, admin)
+    const roleError = checkRole(c, "editor");
     if (roleError) return roleError;
 
     console.log("[ACTUALIZAR POST] Iniciando solicitud PUT /posts/:id");

@@ -41,7 +41,8 @@ export class CategoryUpdate extends OpenAPIRoute {
             return authError;
         }
         
-        const roleError = checkRole(c, "admin");
+        // Requiere nivel editor o superior (editor, moderator, admin)
+        const roleError = checkRole(c, "editor");
         if (roleError) return roleError;
 
         console.log("[ACTUALIZAR CATEGORÍA] Iniciando solicitud PUT /categories/:id");

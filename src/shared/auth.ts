@@ -2,6 +2,47 @@ import { AppContext, AuthContext } from "../types";
 import { getSupabaseServiceClient } from "../supabase";
 import type { User } from "@supabase/supabase-js";
 
+// ============================================================================
+// JERARQUÍA DE ROLES
+// ============================================================================
+
+/**
+ * Jerarquía de roles (de menor a mayor privilegio)
+ * Un rol superior tiene todos los permisos de los roles inferiores
+ */
+export const ROLE_HIERARCHY = {
+  viewer: 1,      // Solo lectura
+  editor: 2,      // Lectura + escritura (posts, categories)
+  moderator: 3,   // Lectura + escritura + moderación (consultations)
+  admin: 4,       // Acceso completo
+} as const;
+
+export type Role = keyof typeof ROLE_HIERARCHY;
+
+/**
+ * Obtiene el nivel numérico de un rol
+ * @param role Rol a verificar
+ * @returns Nivel numérico del rol (0 si el rol no existe)
+ */
+export function getRoleLevel(role: string): number {
+  return ROLE_HIERARCHY[role as Role] || 0;
+}
+
+/**
+ * Verifica si un rol tiene al menos el nivel requerido
+ * @param userRole Rol del usuario
+ * @param requiredLevel Nivel mínimo requerido
+ * @returns true si el rol del usuario tiene el nivel requerido o superior
+ */
+export function hasRoleLevel(userRole: string, requiredLevel: number): boolean {
+  const userLevel = getRoleLevel(userRole);
+  return userLevel >= requiredLevel;
+}
+
+// ============================================================================
+// FUNCIONES DE AUTENTICACIÓN
+// ============================================================================
+
 /**
  * Extrae el token JWT del header Authorization
  * Soporta formato "Bearer <token>"
@@ -179,17 +220,29 @@ export async function checkAuth(c: AppContext): Promise<Response | null> {
 }
 
 /**
- * Verifica que el usuario tenga el rol requerido
+ * Verifica que el usuario tenga el rol requerido o superior
+ * Soporta jerarquía: si requieres 'editor', acepta 'editor', 'moderator' o 'admin'
  * Debe usarse después de checkAuth()
  * 
  * Uso:
  * const authError = await checkAuth(c);
  * if (authError) return authError;
  * 
+ * // Opción 1: Rol específico (solo admin - sin jerarquía)
  * const roleError = checkRole(c, 'admin');
+ * 
+ * // Opción 2: Nivel mínimo (editor o superior - con jerarquía)
+ * const roleError = checkRole(c, 'editor');  // Acepta editor, moderator, admin
+ * 
+ * // Opción 3: Múltiples roles específicos
+ * const roleError = checkRole(c, ['admin', 'moderator']);
+ * 
  * if (roleError) return roleError;
  */
-export function checkRole(c: AppContext, requiredRole: string): Response | null {
+export function checkRole(
+  c: AppContext, 
+  requiredRole: string | string[]
+): Response | null {
   const auth = c.get("auth") as AuthContext | undefined;
 
   if (!auth) {
@@ -207,16 +260,102 @@ export function checkRole(c: AppContext, requiredRole: string): Response | null 
     );
   }
 
-  // Solo 'admin' tiene acceso completo
-  if (requiredRole === "admin" && auth.role !== "admin") {
-    console.warn(`[AUTH] Acceso denegado - Rol requerido: ${requiredRole}, Rol actual: ${auth.role}`);
+  // Si es un array, verificar si el usuario tiene alguno de los roles
+  if (Array.isArray(requiredRole)) {
+    const hasAnyRole = requiredRole.some(role => {
+      // Si el rol requerido es 'admin', solo acepta 'admin' exacto
+      if (role === 'admin') {
+        return auth.role === 'admin';
+      }
+      // Para otros roles, usar jerarquía
+      const requiredLevel = getRoleLevel(role);
+      if (requiredLevel === 0) {
+        // Rol no reconocido en la jerarquía, verificar coincidencia exacta
+        return auth.role === role;
+      }
+      return hasRoleLevel(auth.role, requiredLevel);
+    });
+
+    if (!hasAnyRole) {
+      console.warn(
+        `[AUTH] Acceso denegado - Roles requeridos: ${requiredRole.join(', ')}, Rol actual: ${auth.role}`
+      );
+      return c.json(
+        {
+          success: false,
+          errors: [
+            {
+              code: 403,
+              message: `Forbidden - Se requiere uno de los siguientes roles: ${requiredRole.join(', ')}`,
+            },
+          ],
+        },
+        403,
+      );
+    }
+    return null;
+  }
+
+  // Si es un solo rol
+  // Si el rol requerido es 'admin', solo acepta 'admin' exacto (sin jerarquía)
+  if (requiredRole === "admin") {
+    if (auth.role !== "admin") {
+      console.warn(
+        `[AUTH] Acceso denegado - Rol requerido: ${requiredRole}, Rol actual: ${auth.role}`
+      );
+      return c.json(
+        {
+          success: false,
+          errors: [
+            {
+              code: 403,
+              message: "Forbidden - Se requiere rol de administrador",
+            },
+          ],
+        },
+        403,
+      );
+    }
+    return null;
+  }
+
+  // Para otros roles, usar jerarquía (el usuario debe tener el rol requerido o superior)
+  const requiredLevel = getRoleLevel(requiredRole);
+  
+  if (requiredLevel === 0) {
+    // Rol no reconocido en la jerarquía, verificar coincidencia exacta
+    if (auth.role !== requiredRole) {
+      console.warn(
+        `[AUTH] Acceso denegado - Rol requerido: ${requiredRole}, Rol actual: ${auth.role}`
+      );
+      return c.json(
+        {
+          success: false,
+          errors: [
+            {
+              code: 403,
+              message: `Forbidden - Se requiere rol de ${requiredRole}`,
+            },
+          ],
+        },
+        403,
+      );
+    }
+    return null;
+  }
+
+  // Verificar jerarquía: el usuario debe tener el nivel requerido o superior
+  if (!hasRoleLevel(auth.role, requiredLevel)) {
+    console.warn(
+      `[AUTH] Acceso denegado - Nivel requerido: ${requiredRole} (${requiredLevel}), Rol actual: ${auth.role} (${getRoleLevel(auth.role)})`
+    );
     return c.json(
       {
         success: false,
         errors: [
           {
             code: 403,
-            message: "Forbidden - Se requiere rol de administrador",
+            message: `Forbidden - Se requiere rol de ${requiredRole} o superior`,
           },
         ],
       },

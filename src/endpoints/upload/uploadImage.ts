@@ -66,11 +66,12 @@ export class UploadImage extends OpenAPIRoute {
     };
 
     public async handle(c: AppContext) {
-        // Verificar autenticación y rol de admin
+        // Verificar autenticación y rol
         const authError = await checkAuth(c);
         if (authError) return authError;
         
-        const roleError = checkRole(c, "admin");
+        // Requiere nivel editor o superior (editor, moderator, admin)
+        const roleError = checkRole(c, "editor");
         if (roleError) return roleError;
 
         const formData = await c.req.parseBody();

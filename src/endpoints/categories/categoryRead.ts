@@ -23,7 +23,8 @@ export class CategoryRead extends OpenAPIRoute {
     };
 
     public async handle(c: AppContext) {
-        // Endpoint público - no requiere autenticación
+        // Endpoint público - NO requiere autenticación
+        // Permite que cualquier usuario del frontend pueda leer una categoría específica
 
         console.log("[LEER CATEGORÍA] Iniciando solicitud GET /categories/:id");
         const data = await this.getValidatedData<typeof this.schema>();

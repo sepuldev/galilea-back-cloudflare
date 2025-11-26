@@ -27,8 +27,9 @@ export class CategoryDelete extends OpenAPIRoute {
         // Verificar autenticación y rol de admin
         const authError = await checkAuth(c);
         if (authError) return authError;
-        
-        const roleError = checkRole(c, "admin");
+
+        // Requiere nivel moderator o superior (moderator, admin)
+        const roleError = checkRole(c, "moderator");
         if (roleError) return roleError;
 
         console.log("[ELIMINAR CATEGORÍA] Iniciando solicitud DELETE /categories/:id");

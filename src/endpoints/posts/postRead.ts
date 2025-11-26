@@ -23,6 +23,9 @@ export class PostRead extends OpenAPIRoute {
   };
 
   public async handle(c: AppContext) {
+    // Endpoint público - NO requiere autenticación
+    // Permite que cualquier usuario del frontend pueda leer un post específico
+
     console.log("[LEER POST] Iniciando solicitud GET /posts/:id");
     const data = await this.getValidatedData<typeof this.schema>();
     console.log("[LEER POST] ID del post solicitado:", data.params.id);

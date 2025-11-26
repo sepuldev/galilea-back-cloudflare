@@ -27,8 +27,9 @@ export class ConsultationDelete extends OpenAPIRoute {
     // Verificar autenticación y rol de admin
     const authError = await checkAuth(c);
     if (authError) return authError;
-    
-    const roleError = checkRole(c, "admin");
+
+    // Requiere nivel moderator o superior (moderator, admin) - consultas son sensibles
+    const roleError = checkRole(c, "moderator");
     if (roleError) return roleError;
 
     console.log("[ELIMINAR CONSULTA] Iniciando solicitud DELETE /consultations/:id");

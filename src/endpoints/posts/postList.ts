@@ -27,6 +27,9 @@ export class PostList extends OpenAPIRoute {
   };
 
   public async handle(c: AppContext) {
+    // Endpoint público - NO requiere autenticación
+    // Permite que cualquier usuario del frontend pueda listar posts
+
     console.log("[LISTAR POSTS] Iniciando solicitud GET /posts");
     const data = await this.getValidatedData<typeof this.schema>();
     console.log("[LISTAR POSTS] Parámetros de consulta recibidos:", JSON.stringify(data.query, null, 2));

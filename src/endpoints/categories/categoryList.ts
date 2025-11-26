@@ -17,6 +17,9 @@ export class CategoryList extends OpenAPIRoute {
     };
 
     public async handle(c: AppContext) {
+        // Endpoint público - NO requiere autenticación
+        // Permite que cualquier usuario del frontend pueda listar categorías
+
         console.log("[LISTAR CATEGORÍAS] Iniciando solicitud GET /categories");
         const supabase = getSupabaseClient(c.env);
         console.log("[LISTAR CATEGORÍAS] Cliente de Supabase inicializado");

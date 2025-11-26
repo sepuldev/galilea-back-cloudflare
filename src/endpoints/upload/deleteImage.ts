@@ -90,11 +90,12 @@ export class DeleteImage extends OpenAPIRoute {
     };
 
     public async handle(c: AppContext) {
-        // Verificar autenticación y rol de admin
+        // Verificar autenticación y rol
         const authError = await checkAuth(c);
         if (authError) return authError;
         
-        const roleError = checkRole(c, "admin");
+        // Requiere nivel moderator o superior (moderator, admin)
+        const roleError = checkRole(c, "moderator");
         if (roleError) return roleError;
 
         const data = await this.getValidatedData<typeof this.schema>();

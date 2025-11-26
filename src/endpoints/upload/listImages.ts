@@ -63,7 +63,8 @@ export class ListImages extends OpenAPIRoute {
     };
 
     public async handle(c: AppContext) {
-        // Endpoint público - no requiere autenticación
+        // Endpoint público - NO requiere autenticación
+        // Permite que cualquier usuario del frontend pueda listar imágenes públicas
 
         const data = await this.getValidatedData<typeof this.schema>();
         const limit = parseInt(data.query?.limit || "100", 10);
