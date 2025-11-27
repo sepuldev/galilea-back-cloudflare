@@ -71,20 +71,35 @@ export class AuthLogin extends OpenAPIRoute {
         // 2. Obtener rol del usuario desde admin_profiles
         const { data: profileData, error: profileError } = await supabase
             .from("admin_profiles")
-            .select("role, username")
+            .select("role, username, is_active")
             .eq("user_id", authData.user.id)
-            .single();
+            .maybeSingle();
 
-        if (profileError || !profileData) {
+        if (profileError) {
             console.error(`[AUTH] Error fetching profile for user ${authData.user.id}:`, profileError);
-            // Si no tiene perfil, denegar acceso (o asignar rol por defecto si fuera necesario)
+            return c.json(
+                {
+                    success: false,
+                    errors: [
+                        {
+                            code: 500,
+                            message: "Internal server error during auth",
+                        },
+                    ],
+                },
+                500
+            );
+        }
+
+        if (!profileData || !profileData.is_active) {
+            console.warn(`[AUTH] Access denied for user ${authData.user.id}. Profile exists: ${!!profileData}, Active: ${profileData?.is_active}`);
             return c.json(
                 {
                     success: false,
                     errors: [
                         {
                             code: 403,
-                            message: "User profile not found or access denied",
+                            message: "Access denied: User profile not found or inactive",
                         },
                     ],
                 },
