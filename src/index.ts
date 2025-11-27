@@ -58,6 +58,15 @@ app.options("*", (c) => {
 });
 
 /* ============================================================
+   LOGGING MIDDLEWARE
+   ============================================================ */
+app.use("*", async (c, next) => {
+  console.log(`[REQUEST] ${c.req.method} ${c.req.url}`);
+  console.log(`[REQUEST] Path: ${c.req.path}`);
+  await next();
+});
+
+/* ============================================================
    MIDDLEWARE PRINCIPAL CORS
    ============================================================ */
 app.use("*", async (c, next) => {
