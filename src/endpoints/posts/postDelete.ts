@@ -1,7 +1,7 @@
 import { contentJson, OpenAPIRoute } from "chanfana";
 import { AppContext } from "../../types";
 import { PostModel } from "./base";
-import { getSupabaseClient } from "../../supabase";
+import { getSupabaseServiceClient } from "../../supabase";
 import { z } from "zod";
 import { createCRUDResponses } from "../../shared/responses";
 import { checkAuth, checkRole } from "../../shared/auth";
@@ -35,9 +35,9 @@ export class PostDelete extends OpenAPIRoute {
     console.log("[ELIMINAR POST] Iniciando solicitud DELETE /posts/:id");
     const data = await this.getValidatedData<typeof this.schema>();
     console.log("[ELIMINAR POST] ID del post a eliminar:", data.params.id);
-    
-    const supabase = getSupabaseClient(c.env);
-    console.log("[ELIMINAR POST] Cliente de Supabase inicializado");
+
+    const supabase = getSupabaseServiceClient(c.env);
+    console.log("[ELIMINAR POST] Cliente de Supabase inicializado (SERVICE_ROLE_KEY)");
     console.log("[ELIMINAR POST] Nombre de tabla:", PostModel.tableName);
 
     // Primero, verificar si el post existe
@@ -46,20 +46,26 @@ export class PostDelete extends OpenAPIRoute {
       .from(PostModel.tableName)
       .select("id")
       .eq("id", data.params.id)
-      .single();
+      .maybeSingle();
 
     if (fetchError) {
       console.error("[ELIMINAR POST] ERROR al verificar existencia:", fetchError.message);
       console.error("[ELIMINAR POST] Detalles del error:", JSON.stringify(fetchError, null, 2));
-      console.error("[ELIMINAR POST] Código de error:", fetchError.code);
+      return c.json(
+        {
+          success: false,
+          errors: [{ code: 500, message: "Database error" }],
+        },
+        500,
+      );
     }
 
-    if (fetchError || !existingPost) {
+    if (!existingPost) {
       console.warn("[ELIMINAR POST] Post no encontrado con ID:", data.params.id);
       return c.json(
         {
           success: false,
-          errors: [{ code: 404, message: "Not Found" }],
+          errors: [{ code: 404, message: "Post not found" }],
         },
         404,
       );

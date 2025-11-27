@@ -2,7 +2,7 @@
 import { contentJson, OpenAPIRoute } from "chanfana";
 import { AppContext } from "../../types";
 import { PostModel } from "./base";
-import { getSupabaseClient } from "../../supabase";
+import { getSupabaseServiceClient } from "../../supabase";
 import { createCRUDResponses } from "../../shared/responses";
 import { checkAuth, checkRole } from "../../shared/auth";
 import { checkRateLimit } from "../../shared/rateLimit";
@@ -45,9 +45,9 @@ export class PostCreate extends OpenAPIRoute {
     console.log("[CREAR POST] Iniciando solicitud POST /posts");
     const data = await this.getValidatedData<typeof this.schema>();
     console.log("[CREAR POST] Datos recibidos en el body:", JSON.stringify(data.body, null, 2));
-    
-    const supabase = getSupabaseClient(c.env);
-    console.log("[CREAR POST] Cliente de Supabase inicializado");
+
+    const supabase = getSupabaseServiceClient(c.env);
+    console.log("[CREAR POST] Cliente de Supabase inicializado (SERVICE_ROLE_KEY)");
     console.log("[CREAR POST] Nombre de tabla:", PostModel.tableName);
 
     console.log("[CREAR POST] Insertando datos en Supabase...");
@@ -88,4 +88,3 @@ export class PostCreate extends OpenAPIRoute {
     );
   }
 }
-

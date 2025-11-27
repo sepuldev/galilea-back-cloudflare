@@ -34,7 +34,7 @@ export interface AuthContext {
   username?: string;
 }
 
-export type AppContext = Context<{ 
+export type AppContext = Context<{
   Bindings: Env;
   Variables: {
     auth: AuthContext;
@@ -131,6 +131,7 @@ export interface PostUpdateData {
   content?: string | null;
   category_id?: number | null;
   image_url?: string | null;
+  updated_at?: string;
 }
 
 // ============================================================================
