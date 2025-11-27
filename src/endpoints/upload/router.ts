@@ -6,6 +6,6 @@ import { DeleteImage } from "./deleteImage";
 
 export const uploadRouter = fromHono(new Hono());
 
-uploadRouter.post("/", new UploadImage());
-uploadRouter.get("/", new ListImages());
-uploadRouter.delete("/:path", new DeleteImage());
+uploadRouter.post("/", UploadImage);
+uploadRouter.get("/", ListImages);
+uploadRouter.delete("/:path", DeleteImage);

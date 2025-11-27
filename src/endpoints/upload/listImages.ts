@@ -77,6 +77,8 @@ export class ListImages extends OpenAPIRoute {
         console.log(`[LIST IMAGES] Listing images from bucket: ${bucketName}, folder: ${folderPath}`);
 
         try {
+            console.log(`[LIST IMAGES] About to call supabase.storage.from('${bucketName}').list('${folderPath}')`);
+
             // Listar archivos en la carpeta 'posts' del bucket
             const { data: files, error } = await supabase
                 .storage
@@ -87,8 +89,12 @@ export class ListImages extends OpenAPIRoute {
                     sortBy: { column: 'created_at', order: 'desc' }
                 });
 
+            console.log(`[LIST IMAGES] Supabase response - error:`, error);
+            console.log(`[LIST IMAGES] Supabase response - files count:`, files?.length);
+
             if (error) {
                 console.error("[LIST IMAGES] Error listing files:", error);
+                console.error("[LIST IMAGES] Error details:", JSON.stringify(error, null, 2));
                 return c.json(
                     {
                         success: false,
@@ -132,9 +138,9 @@ export class ListImages extends OpenAPIRoute {
             return c.json(
                 {
                     success: false,
-                    errors: [{ 
-                        code: 500, 
-                        message: error instanceof Error ? error.message : "Internal Server Error" 
+                    errors: [{
+                        code: 500,
+                        message: error instanceof Error ? error.message : "Internal Server Error"
                     }],
                 },
                 500
