@@ -33,14 +33,14 @@ export class CategoryUpdate extends OpenAPIRoute {
         console.log("[ACTUALIZAR CATEGORÍA] Handler ejecutado - URL:", c.req.url);
         console.log("[ACTUALIZAR CATEGORÍA] Método:", c.req.method);
         console.log("[ACTUALIZAR CATEGORÍA] Path:", c.req.path);
-        
+
         // Verificar autenticación y rol de admin
         const authError = await checkAuth(c);
         if (authError) {
             console.log("[ACTUALIZAR CATEGORÍA] Error de autenticación");
             return authError;
         }
-        
+
         // Requiere nivel editor o superior (editor, moderator, admin)
         const roleError = checkRole(c, "editor");
         if (roleError) return roleError;
@@ -59,7 +59,7 @@ export class CategoryUpdate extends OpenAPIRoute {
         }
         console.log("[ACTUALIZAR CATEGORÍA] ID de la categoría a actualizar:", categoryId);
         console.log("[ACTUALIZAR CATEGORÍA] Datos recibidos en el body:", JSON.stringify(data.body, null, 2));
-        
+
         const supabase = getSupabaseServiceClient(c.env);
         console.log("[ACTUALIZAR CATEGORÍA] Cliente de Supabase inicializado (SERVICE_ROLE_KEY)");
         console.log("[ACTUALIZAR CATEGORÍA] Nombre de tabla:", CategoryModel.tableName);
@@ -68,7 +68,7 @@ export class CategoryUpdate extends OpenAPIRoute {
         const updateData: { name?: string | null; description?: string | null; updated_at?: string } = {};
         if (data.body.name !== undefined) updateData.name = data.body.name;
         if (data.body.description !== undefined) updateData.description = data.body.description;
-        
+
         // Si no hay datos para actualizar, devolver error
         if (Object.keys(updateData).length === 0) {
             console.warn("[ACTUALIZAR CATEGORÍA] No se proporcionaron datos para actualizar");
@@ -80,7 +80,7 @@ export class CategoryUpdate extends OpenAPIRoute {
                 400,
             );
         }
-        
+
         // Actualizar timestamp
         updateData.updated_at = new Date().toISOString();
 
@@ -88,15 +88,20 @@ export class CategoryUpdate extends OpenAPIRoute {
         console.log("[ACTUALIZAR CATEGORÍA] Campos a actualizar:", Object.keys(updateData).join(", "));
 
         console.log("[ACTUALIZAR CATEGORÍA] Actualizando categoría en Supabase...");
-        
+
         // Primero verificar que la categoría existe
         const { data: existingCategory, error: fetchError } = await supabase
             .from(CategoryModel.tableName)
             .select("id")
             .eq("id", categoryId)
-            .single();
-            
-        if (fetchError || !existingCategory) {
+            .maybeSingle();
+
+        if (fetchError) {
+            console.error("[ACTUALIZAR CATEGORÍA] Error verificando existencia:", fetchError);
+            return c.json({ success: false, errors: [{ code: 500, message: "Database error" }] }, 500);
+        }
+
+        if (!existingCategory) {
             console.warn("[ACTUALIZAR CATEGORÍA] Categoría no encontrada con ID:", categoryId);
             return c.json(
                 {
@@ -106,13 +111,13 @@ export class CategoryUpdate extends OpenAPIRoute {
                 404,
             );
         }
-        
+
         const { data: result, error } = await supabase
             .from(CategoryModel.tableName)
             .update(updateData)
             .eq("id", categoryId)
             .select()
-            .single();
+            .maybeSingle();
 
         if (error) {
             console.error("[ACTUALIZAR CATEGORÍA] ERROR al actualizar en Supabase:", error.message);

@@ -35,7 +35,7 @@ export class CategoryDelete extends OpenAPIRoute {
         console.log("[ELIMINAR CATEGORÍA] Iniciando solicitud DELETE /categories/:id");
         const data = await this.getValidatedData<typeof this.schema>();
         console.log("[ELIMINAR CATEGORÍA] ID de la categoría a eliminar:", data.params.id);
-        
+
         const supabase = getSupabaseServiceClient(c.env);
         console.log("[ELIMINAR CATEGORÍA] Cliente de Supabase inicializado (SERVICE_ROLE_KEY)");
         console.log("[ELIMINAR CATEGORÍA] Nombre de tabla:", CategoryModel.tableName);
@@ -46,20 +46,26 @@ export class CategoryDelete extends OpenAPIRoute {
             .from(CategoryModel.tableName)
             .select("id")
             .eq("id", data.params.id)
-            .single();
+            .maybeSingle();
 
         if (fetchError) {
             console.error("[ELIMINAR CATEGORÍA] ERROR al verificar existencia:", fetchError.message);
             console.error("[ELIMINAR CATEGORÍA] Detalles del error:", JSON.stringify(fetchError, null, 2));
-            console.error("[ELIMINAR CATEGORÍA] Código de error:", fetchError.code);
+            return c.json(
+                {
+                    success: false,
+                    errors: [{ code: 500, message: "Database error" }],
+                },
+                500,
+            );
         }
 
-        if (fetchError || !existingCategory) {
+        if (!existingCategory) {
             console.warn("[ELIMINAR CATEGORÍA] Categoría no encontrada con ID:", data.params.id);
             return c.json(
                 {
                     success: false,
-                    errors: [{ code: 404, message: "Not Found" }],
+                    errors: [{ code: 404, message: "Category not found" }],
                 },
                 404,
             );
