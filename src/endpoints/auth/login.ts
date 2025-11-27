@@ -2,7 +2,7 @@ import { OpenAPIRoute } from "chanfana";
 import { AppContext } from "../../types";
 import { createCRUDResponses } from "../../shared/responses";
 import { z } from "zod";
-import { getSupabaseClient } from "../../supabase";
+import { getSupabaseServiceClient } from "../../supabase";
 
 const LoginInputSchema = z.object({
     email: z.string().email(),
@@ -45,7 +45,7 @@ export class AuthLogin extends OpenAPIRoute {
         const data = await this.getValidatedData<typeof this.schema>();
         const { email, password } = data.body;
 
-        const supabase = getSupabaseClient(c.env);
+        const supabase = getSupabaseServiceClient(c.env);
 
         // 1. Autenticar con Supabase Auth
         const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
